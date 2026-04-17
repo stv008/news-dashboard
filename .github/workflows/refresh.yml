@@ -34,6 +34,11 @@ jobs:
       - name: Prepare index.html for Pages
         run: cp Output/dashboard.html Output/index.html
 
+      - name: Inject workflow token into index.html
+        env:
+          GH_WORKFLOW_TOKEN: ${{ secrets.GH_WORKFLOW_TOKEN }}
+        run: sed -i "s|__GH_WORKFLOW_TOKEN__|${GH_WORKFLOW_TOKEN}|g" Output/index.html
+
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
