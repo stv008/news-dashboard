@@ -1,0 +1,40 @@
+name: Refresh News Dashboard
+
+on:
+  schedule:
+    - cron: '0 6,12,18 * * *'  # 6am, noon, 6pm UTC daily
+  workflow_dispatch:             # allow manual trigger from GitHub UI
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: pip install feedparser anthropic
+
+      - name: Build dashboard
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: python Source/run.py
+
+      - name: Prepare index.html for Pages
+        run: cp Output/dashboard.html Output/index.html
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./Output
+          publish_branch: gh-pages
+          commit_message: 'chore: refresh dashboard [run ${{ github.run_number }}]'

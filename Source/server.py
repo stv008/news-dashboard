@@ -15,7 +15,7 @@ import sys
 import json
 import time
 import threading
-from http.server import HTTPServer, BaseHTTPRequestHandler
+from http.server import ThreadingHTTPServer, BaseHTTPRequestHandler
 from urllib.parse import urlparse
 
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
@@ -27,6 +27,7 @@ from config import OUTPUT_HTML, SERVER_PORT
 
 refresh_lock = threading.Lock()
 last_generation_time = 0
+bound_port = SERVER_PORT  # updated at startup if we fall back to another port
 
 
 class DashboardHandler(BaseHTTPRequestHandler):
@@ -44,7 +45,7 @@ class DashboardHandler(BaseHTTPRequestHandler):
         if path == "/refresh":
             origin = self.headers.get("Origin", "")
             referer = self.headers.get("Referer", "")
-            allowed = [f"http://localhost:{SERVER_PORT}", f"http://127.0.0.1:{SERVER_PORT}"]
+            allowed = [f"http://localhost:{bound_port}", f"http://127.0.0.1:{bound_port}"]
             if origin and origin not in allowed:
                 self._json_response({"error": "Forbidden"}, status=403)
                 return
@@ -111,17 +112,30 @@ class DashboardHandler(BaseHTTPRequestHandler):
         pass
 
 
+def _start_server(requested_port):
+    """Start the HTTP server, falling back to the next free port if busy."""
+    for port in range(requested_port, requested_port + 10):
+        try:
+            return ThreadingHTTPServer(("127.0.0.1", port), DashboardHandler), port
+        except OSError as e:
+            if getattr(e, "errno", None) in (48, 98, 10048):  # macOS/Linux/Windows "in use"
+                print(f"  Port {port} in use, trying {port + 1}...")
+                continue
+            raise
+    raise RuntimeError(f"Could not bind to any port in {requested_port}..{requested_port + 9}")
+
+
 def main():
     port = int(sys.argv[1]) if len(sys.argv) > 1 else SERVER_PORT
-    global last_generation_time
+    global last_generation_time, bound_port
     if not os.path.exists(OUTPUT_HTML):
         print("No dashboard found. Running initial fetch...")
         fetch_all()
         ai_summary = generate_briefing() if is_available() else None
         build_dashboard(ai_summary)
         last_generation_time = time.time()
-    server = HTTPServer(("127.0.0.1", port), DashboardHandler)
-    print(f"News Dashboard running at http://localhost:{port}")
+    server, bound_port = _start_server(port)
+    print(f"News Dashboard running at http://localhost:{bound_port}")
     print("Press Ctrl+C to stop")
     try:
         server.serve_forever()

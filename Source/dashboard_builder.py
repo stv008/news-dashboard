@@ -3,6 +3,7 @@ Dashboard Builder
 Generates a beautiful HTML dashboard from stored articles.
 """
 
+import os
 import sqlite3
 import re
 import html as html_mod
@@ -266,7 +267,7 @@ TEMPLATE = """<!DOCTYPE html>
             position: relative;
         }
         .briefing-action li::before {
-            content: "â";
+            content: "▸";
             position: absolute;
             left: 0;
             color: var(--accent);
@@ -479,6 +480,18 @@ TEMPLATE = """<!DOCTYPE html>
     document.getElementById('search').addEventListener('input', applyFilters);
     applyFilters();
 
+    // Keyboard shortcut: "/" focuses search, Escape clears it
+    document.addEventListener('keydown', function(e) {
+        if (e.key === '/' && !['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) {
+            e.preventDefault();
+            document.getElementById('search').focus();
+        } else if (e.key === 'Escape' && document.activeElement.id === 'search') {
+            document.getElementById('search').value = '';
+            applyFilters();
+            document.activeElement.blur();
+        }
+    });
+
     // Toggle article summary on click
     document.querySelectorAll('.article').forEach(el => {
         el.addEventListener('click', function(e) {
@@ -487,8 +500,13 @@ TEMPLATE = """<!DOCTYPE html>
         });
     });
 
-    // Refresh button â POST to /refresh, poll /status for real completion (#20, #3)
+    // Refresh button -- POST to /refresh, poll /status for real completion (#20, #3)
     function refreshDashboard() {
+        const isLocal = ['localhost', '127.0.0.1', ''].includes(window.location.hostname);
+        if (!isLocal) {
+            alert('This is the static version — it refreshes automatically via GitHub Actions (6am, noon, 6pm UTC).\n\nTo trigger a manual refresh, go to:\ngithub.com/stv008/news-dashboard → Actions → Refresh News Dashboard → Run workflow');
+            return;
+        }
         const btn = document.getElementById('refreshBtn');
         btn.classList.add('loading');
         btn.innerHTML = '<span class="icon">&#x21bb;</span> Refreshing...';
@@ -637,6 +655,7 @@ def build_dashboard(ai_summary=None):
     html_output = html_output.replace("{{ ai_summary_section }}", ai_html)
     html_output = html_output.replace("{{ lookback_hours }}", str(LOOKBACK_HOURS))
 
+    os.makedirs(os.path.dirname(OUTPUT_HTML), exist_ok=True)
     with open(OUTPUT_HTML, "w", encoding="utf-8") as f:
         f.write(html_output)
 
