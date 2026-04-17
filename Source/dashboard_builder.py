@@ -502,6 +502,11 @@ TEMPLATE = """<!DOCTYPE html>
 
     // Refresh button -- POST to /refresh, poll /status for real completion (#20, #3)
     function refreshDashboard() {
+        const isLocal = ['localhost', '127.0.0.1', ''].includes(window.location.hostname);
+        if (!isLocal) {
+            alert('This is the static version — it refreshes automatically via GitHub Actions (6am, noon, 6pm UTC).\n\nTo trigger a manual refresh, go to:\ngithub.com/stv008/news-dashboard → Actions → Refresh News Dashboard → Run workflow');
+            return;
+        }
         const btn = document.getElementById('refreshBtn');
         btn.classList.add('loading');
         btn.innerHTML = '<span class="icon">&#x21bb;</span> Refreshing...';
