@@ -109,8 +109,22 @@ def generate_briefing():
             messages=[{"role": "user", "content": f"Today's articles:\n\n{digest}"}],
         )
         summary = response.content[0].text
-        print("  AI briefing generated successfully")
+        usage = getattr(response, "usage", None)
+        if usage:
+            cached = getattr(usage, "cache_read_input_tokens", 0) or 0
+            print(f"  AI briefing generated (in={usage.input_tokens}, cached={cached}, out={usage.output_tokens})")
+        else:
+            print("  AI briefing generated successfully")
         return summary
+    except anthropic.AuthenticationError as e:
+        print(f"  ERROR: Invalid ANTHROPIC_API_KEY — {e}")
+        return None
+    except anthropic.RateLimitError as e:
+        print(f"  Warning: Claude rate limit hit — {e}")
+        return None
+    except anthropic.APIConnectionError as e:
+        print(f"  Warning: Could not reach Claude API — {e}")
+        return None
     except Exception as e:
         print(f"  Warning: AI summary failed: {e}")
         return None

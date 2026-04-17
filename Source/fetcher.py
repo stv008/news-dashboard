@@ -10,12 +10,19 @@ import hashlib
 import html
 import re
 import urllib.request
+import urllib.error
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timedelta, timezone
 from config import (
     FEEDS, LOOKBACK_HOURS, DB_PATH, USER_AGENT,
     FETCH_TIMEOUT_SECONDS, FETCH_DELAY_SECONDS, MAX_SUMMARY_LENGTH,
     MAX_ARTICLE_AGE_DAYS, MAX_FETCH_RETRIES,
 )
+
+# HTTP errors that will never succeed on retry
+NON_RETRIABLE_STATUS = {400, 401, 403, 404, 410, 451}
+# Max feeds fetched concurrently
+MAX_FETCH_WORKERS = 8
 
 
 def init_db():
@@ -79,13 +86,21 @@ def parse_date(entry):
 
 
 def fetch_with_retry(url):
-    """Fetch a URL with exponential backoff retries. Raises on final failure."""
+    """Fetch a URL with exponential backoff retries. Raises on final failure.
+    Skips retries for non-retriable HTTP status codes (4xx client errors).
+    """
     req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
-    last_err = None
-    for attempt in range(MAX_FETCH_RETRIES):
+    last_err = RuntimeError("no attempts made")
+    for attempt in range(max(1, MAX_FETCH_RETRIES)):
         try:
             response = urllib.request.urlopen(req, timeout=FETCH_TIMEOUT_SECONDS)
             return response.read()
+        except urllib.error.HTTPError as e:
+            last_err = e
+            if e.code in NON_RETRIABLE_STATUS:
+                raise  # no point retrying
+            if attempt < MAX_FETCH_RETRIES - 1:
+                time.sleep(FETCH_DELAY_SECONDS * (2 ** attempt))
         except Exception as e:
             last_err = e
             if attempt < MAX_FETCH_RETRIES - 1:
@@ -190,21 +205,31 @@ def prune_old_articles():
 
 
 def fetch_all():
-    """Fetch articles from all configured publications."""
+    """Fetch articles from all configured publications concurrently."""
     init_db()
     prune_old_articles()
+
+    # Flatten (pub_name, feed_info) pairs so all feeds run in a single pool
+    jobs = [(pub_name, feed_info) for pub_name, feeds in FEEDS.items() for feed_info in feeds]
+    per_pub = {pub: [] for pub in FEEDS}
+
+    start = time.time()
+    with ThreadPoolExecutor(max_workers=MAX_FETCH_WORKERS) as pool:
+        futures = {pool.submit(fetch_feed, pub, info): pub for pub, info in jobs}
+        for future in as_completed(futures):
+            pub = futures[future]
+            try:
+                per_pub[pub].extend(future.result())
+            except Exception as e:
+                print(f"  Error fetching {pub}: {e}")
+
     total_new = 0
-    for pub_name, feeds in FEEDS.items():
-        print(f"Fetching {pub_name}...")
-        pub_articles = []
-        for feed_info in feeds:
-            articles = fetch_feed(pub_name, feed_info)
-            pub_articles.extend(articles)
-            time.sleep(FETCH_DELAY_SECONDS)
+    for pub_name, pub_articles in per_pub.items():
         new = save_articles(pub_articles)
         total_new += new
-        print(f"  Got {len(pub_articles)} articles, {new} new")
-    print(f"\nTotal new articles saved: {total_new}")
+        print(f"  {pub_name}: {len(pub_articles)} articles, {new} new")
+    elapsed = time.time() - start
+    print(f"\nTotal new articles saved: {total_new} ({elapsed:.1f}s)")
     return total_new
 
 

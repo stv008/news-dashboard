@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.venv/
+venv/
+.env
+
+# Runtime output
+Output/dashboard.html
+Source/articles.db
+Source/articles.db-journal
+Source/articles.db-wal
+Source/articles.db-shm
+
+# Editor / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
