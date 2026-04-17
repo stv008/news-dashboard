@@ -14,7 +14,7 @@ from datetime import datetime, timedelta, timezone
 from config import (
     FEEDS, LOOKBACK_HOURS, DB_PATH, USER_AGENT,
     FETCH_TIMEOUT_SECONDS, FETCH_DELAY_SECONDS, MAX_SUMMARY_LENGTH,
-    MAX_ARTICLE_AGE_DAYS,
+    MAX_ARTICLE_AGE_DAYS, MAX_FETCH_RETRIES,
 )
 
 
@@ -78,16 +78,29 @@ def parse_date(entry):
     return datetime.now(timezone.utc).isoformat()
 
 
+def fetch_with_retry(url):
+    """Fetch a URL with exponential backoff retries. Raises on final failure."""
+    req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
+    last_err = None
+    for attempt in range(MAX_FETCH_RETRIES):
+        try:
+            response = urllib.request.urlopen(req, timeout=FETCH_TIMEOUT_SECONDS)
+            return response.read()
+        except Exception as e:
+            last_err = e
+            if attempt < MAX_FETCH_RETRIES - 1:
+                time.sleep(FETCH_DELAY_SECONDS * (2 ** attempt))
+    raise last_err
+
+
 def fetch_feed(pub_name, feed_info):
     """Fetch and parse a single RSS feed. Returns list of article dicts."""
     url = feed_info["url"]
     section = feed_info.get("section", "General")
     articles = []
     try:
-        req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
         try:
-            response = urllib.request.urlopen(req, timeout=FETCH_TIMEOUT_SECONDS)
-            raw_bytes = response.read()
+            raw_bytes = fetch_with_retry(url)
         except Exception as e:
             print(f"  Warning: Could not fetch {pub_name}/{section}: {e}")
             return []
@@ -163,18 +176,17 @@ def prune_old_articles():
     cutoff = datetime.now(timezone.utc) - timedelta(days=MAX_ARTICLE_AGE_DAYS)
     cutoff_iso = cutoff.isoformat()
     with sqlite3.connect(DB_PATH) as conn:
-        cursor = conn.execute(
-            "DELETE FROM articles WHERE published < ?", (cutoff_iso,)
-        )
-        deleted = cursor.rowcount
-        if deleted > 0:
-            conn.execute("DELETE FROM articles_fts")
-            conn.execute("""
-                INSERT INTO articles_fts(rowid, title, summary, publication)
-                SELECT rowid, title, summary, publication FROM articles
-            """)
-            conn.commit()
-            print(f"  Pruned {deleted} articles older than {MAX_ARTICLE_AGE_DAYS} days")
+        rows = conn.execute(
+            "SELECT rowid FROM articles WHERE published < ?", (cutoff_iso,)
+        ).fetchall()
+        if not rows:
+            return
+        rowids = [r[0] for r in rows]
+        # Remove from FTS index incrementally before deleting from content table
+        conn.executemany("DELETE FROM articles_fts WHERE rowid = ?", [(r,) for r in rowids])
+        conn.execute("DELETE FROM articles WHERE published < ?", (cutoff_iso,))
+        conn.commit()
+        print(f"  Pruned {len(rowids)} articles older than {MAX_ARTICLE_AGE_DAYS} days")
 
 
 def fetch_all():

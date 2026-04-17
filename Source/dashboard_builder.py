@@ -4,7 +4,7 @@ Generates a beautiful HTML dashboard from stored articles.
 """
 
 import sqlite3
-import json
+import re
 import html as html_mod
 from datetime import datetime, timezone
 from config import DB_PATH, OUTPUT_HTML, MAX_ARTICLES_PER_PUB, LOOKBACK_HOURS, PUB_COLORS
@@ -15,6 +15,22 @@ def esc(text):
     if not text:
         return ""
     return html_mod.escape(str(text), quote=True)
+
+
+def sanitize_ai_html(raw_html):
+    """Strip dangerous tags and event handlers from AI-generated HTML."""
+    if not raw_html:
+        return raw_html
+    # Remove dangerous block-level elements entirely (with their content)
+    raw_html = re.sub(
+        r'<(script|iframe|object|embed|form|style)[^>]*>.*?</\1>',
+        '', raw_html, flags=re.DOTALL | re.IGNORECASE
+    )
+    # Strip inline event handlers (onclick=, onload=, etc.)
+    raw_html = re.sub(r'\s+on\w+\s*=\s*(?:"[^"]*"|\'[^\']*\')', '', raw_html, flags=re.IGNORECASE)
+    # Strip javascript: URIs in href/src
+    raw_html = re.sub(r'(href|src)\s*=\s*["\']javascript:[^"\']*["\']', '', raw_html, flags=re.IGNORECASE)
+    return raw_html
 
 
 TEMPLATE = """<!DOCTYPE html>
@@ -377,7 +393,7 @@ TEMPLATE = """<!DOCTYPE html>
             <input type="text" id="search" placeholder="Search articles by title, summary, or publication..." autocomplete="off">
             <button class="time-toggle active" id="timeToggle" onclick="toggleTimeFilter()">
                 <span class="toggle-dot"></span>
-                <span class="toggle-label">Last 24h</span>
+                <span class="toggle-label">Last {{ lookback_hours }}h</span>
             </button>
         </div>
     </div>
@@ -402,7 +418,7 @@ TEMPLATE = """<!DOCTYPE html>
     let timeFilterActive = true;
 
     function getCutoff() {
-        return Date.now() - (24 * 60 * 60 * 1000);
+        return Date.now() - ({{ lookback_hours }} * 60 * 60 * 1000);
     }
 
     // Master filter: applies both search and time filter together
@@ -456,7 +472,7 @@ TEMPLATE = """<!DOCTYPE html>
         const btn = document.getElementById('timeToggle');
         timeFilterActive = !timeFilterActive;
         btn.classList.toggle('active', timeFilterActive);
-        btn.querySelector('.toggle-label').textContent = timeFilterActive ? 'Last 24h' : 'All articles';
+        btn.querySelector('.toggle-label').textContent = timeFilterActive ? 'Last {{ lookback_hours }}h' : 'All articles';
         applyFilters();
     }
 
@@ -608,17 +624,8 @@ def build_dashboard(ai_summary=None):
         ai_html = f"""
     <div class="ai-summary">
         <h2>AI Daily Briefing</h2>
-        <div class="summary-text">{ai_summary}</div>
+        <div class="summary-text">{sanitize_ai_html(ai_summary)}</div>
     </div>"""
-
-    # Articles JSON for search (json.dumps auto-escapes for JS context)
-    articles_for_search = [
-        {"title": a["title"], "summary": a.get("summary", ""), "publication": a["publication"]}
-        for a in articles
-    ]
-    # Escape </script> sequences that could break out of the script tag
-    articles_json_safe = json.dumps(articles_for_search).replace("</", "<\\/")
-
 
     now = datetime.now(timezone.utc)
     html_output = TEMPLATE
@@ -628,7 +635,7 @@ def build_dashboard(ai_summary=None):
     html_output = html_output.replace("{{ pub_count }}", str(len(pubs)))
     html_output = html_output.replace("{{ publication_cards }}", cards_html)
     html_output = html_output.replace("{{ ai_summary_section }}", ai_html)
-    html_output = html_output.replace("{{ articles_json }}", articles_json_safe)
+    html_output = html_output.replace("{{ lookback_hours }}", str(LOOKBACK_HOURS))
 
     with open(OUTPUT_HTML, "w", encoding="utf-8") as f:
         f.write(html_output)

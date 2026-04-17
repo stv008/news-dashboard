@@ -101,7 +101,11 @@ def generate_briefing():
         response = client.messages.create(
             model=CLAUDE_MODEL,
             max_tokens=MAX_BRIEFING_TOKENS,
-            system=SYSTEM_PROMPT,
+            system=[{
+                "type": "text",
+                "text": SYSTEM_PROMPT,
+                "cache_control": {"type": "ephemeral"},
+            }],
             messages=[{"role": "user", "content": f"Today's articles:\n\n{digest}"}],
         )
         summary = response.content[0].text
