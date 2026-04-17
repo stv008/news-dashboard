@@ -500,38 +500,11 @@ TEMPLATE = """<!DOCTYPE html>
         });
     });
 
-    // Refresh button -- local: POST to /refresh; Pages: trigger GitHub Actions workflow
-    const GH_WORKFLOW_TOKEN = '__GH_WORKFLOW_TOKEN__';
-
+    // Refresh button -- local: POST to /refresh; Pages: link to Actions UI
     function refreshDashboard() {
         const isLocal = ['localhost', '127.0.0.1', ''].includes(window.location.hostname);
         if (!isLocal) {
-            const btn = document.getElementById('refreshBtn');
-            btn.classList.add('loading');
-            btn.innerHTML = '<span class="icon">&#x21bb;</span> Triggering...';
-            fetch('https://api.github.com/repos/stv008/news-dashboard/actions/workflows/refresh.yml/dispatches', {
-                method: 'POST',
-                headers: {
-                    'Authorization': 'Bearer ' + GH_WORKFLOW_TOKEN,
-                    'Accept': 'application/vnd.github+json',
-                    'X-GitHub-Api-Version': '2022-11-28',
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ ref: 'main' })
-            }).then(r => {
-                if (r.status === 204) {
-                    btn.innerHTML = '<span class="icon">&#x21bb;</span> Refreshing (~90s)...';
-                    setTimeout(() => location.reload(), 95000);
-                } else {
-                    btn.classList.remove('loading');
-                    btn.innerHTML = '<span class="icon">&#x21bb;</span> Refresh';
-                    alert('Could not trigger refresh (status ' + r.status + '). Check your GH_WORKFLOW_TOKEN secret.');
-                }
-            }).catch(e => {
-                btn.classList.remove('loading');
-                btn.innerHTML = '<span class="icon">&#x21bb;</span> Refresh';
-                alert('Network error: ' + e.message);
-            });
+            window.open('https://github.com/stv008/news-dashboard/actions/workflows/refresh.yml', '_blank');
             return;
         }
         const btn = document.getElementById('refreshBtn');
