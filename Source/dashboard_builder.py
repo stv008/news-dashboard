@@ -500,11 +500,33 @@ TEMPLATE = """<!DOCTYPE html>
         });
     });
 
-    // Refresh button -- local: POST to /refresh; Pages: link to Actions UI
+    // Refresh button -- local: POST to /refresh; Pages: call Cloudflare Worker proxy
+    const WORKER_URL = 'https://news-dashboard-refresh.marius-b8b.workers.dev';
+
     function refreshDashboard() {
         const isLocal = ['localhost', '127.0.0.1', ''].includes(window.location.hostname);
         if (!isLocal) {
-            window.open('https://github.com/stv008/news-dashboard/actions/workflows/refresh.yml', '_blank');
+            const btn = document.getElementById('refreshBtn');
+            btn.classList.add('loading');
+            btn.innerHTML = '<span class="icon">&#x21bb;</span> Starting...';
+            fetch(WORKER_URL, { method: 'POST' })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.status === 'started') {
+                        btn.innerHTML = '<span class="icon">&#x21bb;</span> Triggered ✓';
+                        setTimeout(() => {
+                            btn.classList.remove('loading');
+                            btn.innerHTML = '<span class="icon">&#x21bb;</span> Refresh';
+                        }, 4000);
+                    } else {
+                        throw new Error(data.error || 'Unknown error');
+                    }
+                })
+                .catch(err => {
+                    btn.classList.remove('loading');
+                    btn.innerHTML = '<span class="icon">&#x21bb;</span> Refresh';
+                    alert('Could not trigger refresh: ' + err.message);
+                });
             return;
         }
         const btn = document.getElementById('refreshBtn');
