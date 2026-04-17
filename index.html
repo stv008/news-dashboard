@@ -1,0 +1,1297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>News Dashboard - Friday, April 17, 2026</title>
+    <style>
+        :root {
+            --bg: #0f1117;
+            --surface: #1a1d27;
+            --surface2: #242836;
+            --border: #2e3345;
+            --text: #e4e6ef;
+            --text-muted: #8b8fa3;
+            --accent: #6c7aff;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+        .header {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            padding: 24px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header h1 {
+            font-size: 22px;
+            font-weight: 600;
+            letter-spacing: -0.5px;
+        }
+        .header .date {
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+        .header .right-section {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+        .header .stats {
+            display: flex;
+            gap: 20px;
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+        .stats span { font-weight: 600; color: var(--accent); }
+        .refresh-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 18px;
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s, transform 0.2s;
+        }
+        .refresh-btn:hover { opacity: 0.85; }
+        .refresh-btn:active { transform: scale(0.97); }
+        .refresh-btn.loading { opacity: 0.6; pointer-events: none; }
+        .refresh-btn .icon { font-size: 15px; transition: transform 0.6s; }
+        .refresh-btn.loading .icon { animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Search */
+        .search-bar {
+            padding: 20px 40px;
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+        }
+        .search-bar input {
+            width: 100%;
+            max-width: 600px;
+            padding: 12px 18px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--surface2);
+            color: var(--text);
+            font-size: 15px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .search-bar input:focus { border-color: var(--accent); }
+        .search-bar input::placeholder { color: var(--text-muted); }
+        .search-row {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .time-toggle {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 18px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-muted);
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+        .time-toggle:hover { border-color: var(--accent); }
+        .time-toggle .toggle-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--text-muted);
+            transition: background 0.2s;
+        }
+        .time-toggle.active {
+            border-color: var(--accent);
+            color: var(--text);
+        }
+        .time-toggle.active .toggle-dot {
+            background: #48bb78;
+            box-shadow: 0 0 6px rgba(72, 187, 120, 0.4);
+        }
+
+        /* AI Summary section */
+        .ai-summary {
+            margin: 24px 40px;
+            padding: 28px 32px;
+            background: linear-gradient(135deg, #1e2235 0%, #1a1d27 100%);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+        }
+        .ai-summary h2 {
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 16px;
+            color: var(--accent);
+        }
+        .ai-summary .summary-text {
+            font-size: 14px;
+            line-height: 1.7;
+            color: var(--text);
+        }
+        .ai-summary .lead {
+            font-size: 16px;
+            font-weight: 500;
+            line-height: 1.6;
+            color: var(--text);
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border);
+        }
+        .briefing-item {
+            margin-bottom: 18px;
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+        }
+        .priority-badge {
+            flex-shrink: 0;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: var(--accent);
+            color: #fff;
+            font-size: 13px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 2px;
+        }
+        .briefing-item[data-priority="1"] .priority-badge { background: #e53e3e; }
+        .briefing-item[data-priority="2"] .priority-badge { background: #dd6b20; }
+        .briefing-item[data-priority="3"] .priority-badge { background: var(--accent); }
+        .briefing-content {
+            flex: 1;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border);
+        }
+        .briefing-item:last-of-type .briefing-content { border-bottom: none; }
+        .briefing-label {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1.2px;
+            color: var(--accent);
+            margin-bottom: 2px;
+        }
+        .briefing-item[data-priority="1"] .briefing-label { color: #e53e3e; }
+        .briefing-item[data-priority="2"] .briefing-label { color: #dd6b20; }
+        .briefing-headline {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 4px;
+        }
+        .briefing-detail {
+            font-size: 13px;
+            line-height: 1.6;
+            color: var(--text-muted);
+        }
+        .briefing-action {
+            margin-top: 20px;
+            padding: 16px 20px;
+            background: rgba(108, 122, 255, 0.08);
+            border-radius: 8px;
+            border: 1px solid rgba(108, 122, 255, 0.15);
+        }
+        .briefing-action .briefing-label {
+            margin-bottom: 10px;
+        }
+        .briefing-action ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .briefing-action li {
+            font-size: 13px;
+            line-height: 1.6;
+            color: var(--text);
+            padding: 4px 0 4px 20px;
+            position: relative;
+        }
+        .briefing-action li::before {
+            content: "▸";
+            position: absolute;
+            left: 0;
+            color: var(--accent);
+        }
+
+        /* Main grid */
+        .main { padding: 24px 40px; }
+        .pub-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+            gap: 24px;
+        }
+        .pub-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        .pub-header {
+            padding: 14px 18px;
+            font-weight: 600;
+            font-size: 14px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .pub-header .count {
+            font-size: 11px;
+            font-weight: 400;
+            opacity: 0.8;
+            background: rgba(255,255,255,0.15);
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
+        .article-list { padding: 8px 0; }
+        .article {
+            padding: 12px 18px;
+            border-bottom: 1px solid var(--border);
+            transition: background 0.15s;
+            cursor: pointer;
+        }
+        .article:last-child { border-bottom: none; }
+        .article:hover { background: var(--surface2); }
+        .article a {
+            text-decoration: none;
+            color: var(--text);
+            font-size: 14px;
+            font-weight: 500;
+            display: block;
+            line-height: 1.4;
+        }
+        .article a:hover { color: var(--accent); }
+        .article .meta {
+            display: flex;
+            gap: 12px;
+            margin-top: 4px;
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+        .article .summary-preview {
+            margin-top: 6px;
+            font-size: 12px;
+            color: var(--text-muted);
+            line-height: 1.5;
+            display: none;
+        }
+        .article.expanded .summary-preview { display: block; }
+        .section-tag {
+            font-size: 10px;
+            padding: 1px 6px;
+            border-radius: 4px;
+            background: var(--surface2);
+            color: var(--text-muted);
+        }
+
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 60px 40px;
+            font-size: 15px;
+            color: var(--text-muted);
+        }
+        .empty-state strong {
+            color: var(--accent);
+            cursor: pointer;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 30px;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header, .main, .search-bar, .ai-summary { padding-left: 16px; padding-right: 16px; }
+            .pub-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div>
+            <h1>Daily News Dashboard</h1>
+            <div class="date">Friday, April 17, 2026 | Last updated: 12:10 UTC</div>
+        </div>
+        <div class="right-section">
+            <div class="stats">
+                <div><span>521</span> articles</div>
+                <div><span>5</span> publications</div>
+            </div>
+            <button class="refresh-btn" id="refreshBtn" onclick="refreshDashboard()">
+                <span class="icon">&#x21bb;</span> Refresh
+            </button>
+        </div>
+    </div>
+
+    <div class="search-bar">
+        <div class="search-row">
+            <input type="text" id="search" placeholder="Search articles by title, summary, or publication..." autocomplete="off">
+            <button class="time-toggle active" id="timeToggle" onclick="toggleTimeFilter()">
+                <span class="toggle-dot"></span>
+                <span class="toggle-label">Last 48h</span>
+            </button>
+        </div>
+    </div>
+
+    
+    <div class="ai-summary">
+        <h2>AI Daily Briefing</h2>
+        <div class="summary-text"><p class="lead">Falling European energy prices offer near-term fleet cost relief, but dollar weakness and geopolitical uncertainty demand active FX and procurement positioning this week.</p>
+
+<div class="briefing-item" data-priority="1">
+  <span class="priority-badge">1</span>
+  <div class="briefing-content">
+    <div class="briefing-label">ENERGY</div>
+    <div class="briefing-headline">European power prices drop below pre-Middle East war levels as renewables surge and gas eases</div>
+    <div class="briefing-detail">European power futures closed the week below pre-conflict benchmarks, driven by a renewables generation surge and gas price declines tied to ceasefire optimism, Bloomberg reports. For a CEE fleet operator, this directly compresses EV charging and depot energy costs — and strengthens the near-term TCO case for accelerating EV adoption in your Romanian and regional operations. Monitor whether the Lebanon ceasefire holds; a reversal could quickly reverse these gains.</div>
+  </div>
+</div>
+
+<div class="briefing-item" data-priority="2">
+  <span class="priority-badge">2</span>
+  <div class="briefing-content">
+    <div class="briefing-label">FX</div>
+    <div class="briefing-headline">Dollar weakening against equities rally backdrop as Iran war uncertainty drives risk-off dynamics</div>
+    <div class="briefing-detail">The DXY dollar index slipped 0.1% and is exhibiting a negative correlation to equities amid Iran war developments, per Validus Risk Management via WSJ. State Street simultaneously reported elevated FX trading fee revenues, signalling heightened currency market volatility (Bloomberg, WSJ). For a EUR/RON-exposed leasing business with USD-denominated vehicle procurement or cross-border contracts, this volatility environment warrants hedging review — BNR policy posture remains your secondary lever to watch.</div>
+  </div>
+</div>
+
+<div class="briefing-item" data-priority="3">
+  <span class="priority-badge">3</span>
+  <div class="briefing-content">
+    <div class="briefing-label">FLEET</div>
+    <div class="briefing-headline">Ford recalls 1.39 million F-150s over downshifting defect — fleet managers face operational exposure</div>
+    <div class="briefing-detail">Ford is recalling up to 1.39 million F-150 pick-up trucks due to unexpected downshifting risk that can cause loss of vehicle control, WSJ reports. If your fleet or any CEE corporate client runs F-150s or Ford commercial variants, verify VIN exposure immediately and assess substitution availability. More broadly, this signals continued quality-control risk in ICE platforms as OEMs stretch R&D resources toward EV transition.</div>
+  </div>
+</div>
+
+<div class="briefing-item" data-priority="4">
+  <span class="priority-badge">4</span>
+  <div class="briefing-content">
+    <div class="briefing-label">AI</div>
+    <div class="briefing-headline">Anthropic's Claude Mythos signals enterprise AI is moving from productivity tool to strategic infrastructure</div>
+    <div class="briefing-detail">Anthropic's new Mythos model — capable of rapidly identifying and creating cyberthreats — is being sought by US federal agencies, per NYT and Bloomberg. Anthropic CEO Dario Amodei's FT interview underscores the model's power and the governance debates now surrounding frontier AI. For a leasing and mobility operator, the immediate relevance is competitive: fleet management platforms, telematics analytics, and contract risk scoring are all ripe for this generation of AI capability, and peers will move fast.</div>
+  </div>
+</div>
+
+<div class="briefing-item" data-priority="5">
+  <span class="priority-badge">5</span>
+  <div class="briefing-content">
+    <div class="briefing-label">ALUMINUM</div>
+    <div class="briefing-headline">Iran war disrupting aluminum supply chains — vehicle manufacturing costs face upward pressure</div>
+    <div class="briefing-detail">Bloomberg flags that the Iran conflict is straining global aluminum supply chains, a metal central to modern vehicle manufacturing. While this is a second-order risk for leasing (hitting OEM production timelines and residual values rather than your balance sheet directly), supply-side tightening could extend new vehicle delivery lead times across CEE — a critical variable for fleet renewal planning and contract pricing.</div>
+  </div>
+</div>
+
+<div class="briefing-action">
+  <div class="briefing-label">WATCH TODAY</div>
+  <ul>
+    <li>Track Lebanon ceasefire durability — a collapse reverses this week's energy price relief and re-pressures your EV TCO assumptions and depot energy budgets.</li>
+    <li>Run a VIN audit on any Ford F-150 or Ford commercial vehicle exposure across managed fleets; notify affected corporate clients proactively before the weekend.</li>
+    <li>Brief your treasury desk on USD/EUR and EUR/RON volatility — State Street's FX fee surge is a leading indicator of elevated cross-currency risk; review open hedges before Monday open.</li>
+    <li>Assign one internal champion to evaluate Anthropic-class AI tools for fleet analytics or contract risk scoring — competitors in Western Europe are already moving on this generation of capability.</li>
+  </ul>
+</div></div>
+    </div>
+
+    <div class="main">
+        <div class="pub-grid" id="pubGrid">
+            
+    <div class="pub-card">
+        <div class="pub-header" style="background:#FCD0A1;color:#33302E">
+            Financial Times
+            <span class="count">56 articles</span>
+        </div>
+        <div class="article-list">
+            
+        <div class="article" data-title="Total comp: $4.6mn. Of which furniture discounts? Uh, $900k" data-summary="Digging into Arhaus’s compensation tables" data-pub="Financial Times" data-published="2026-04-17T11:59:58+00:00">
+            <a href="https://www.ft.com/content/afa4f683-0003-4c51-a4b6-303bd4a4bcd7" target="_blank" rel="noopener">Total comp: $4.6mn. Of which furniture discounts? Uh, $900k</a>
+            <div class="meta">
+                <span class="section-tag">Companies</span>
+                <span>10m ago</span>
+                
+            </div>
+            <div class="summary-preview">Digging into Arhaus’s compensation tables</div>
+        </div>
+        <div class="article" data-title="Richard Desmond loses £1.3bn lawsuit over National Lottery contract" data-summary="Media tycoon’s Northern &amp; Shell argued regulator had favoured Allwyn in award process" data-pub="Financial Times" data-published="2026-04-17T11:42:21+00:00">
+            <a href="https://www.ft.com/content/f82f1bf3-4a64-4dbd-816d-c0265470ee99" target="_blank" rel="noopener">Richard Desmond loses £1.3bn lawsuit over National Lottery contract</a>
+            <div class="meta">
+                <span class="section-tag">Companies</span>
+                <span>28m ago</span>
+                
+            </div>
+            <div class="summary-preview">Media tycoon’s Northern &amp; Shell argued regulator had favoured Allwyn in award process</div>
+        </div>
+        <div class="article" data-title="Anthropic chief Dario Amodei: ‘I don’t want AI turned on our own people’" data-summary="The tech entrepreneur on Claude Mythos, repercussions from the Pentagon dispute — and his message for the super-rich" data-pub="Financial Times" data-published="2026-04-17T11:30:03+00:00">
+            <a href="https://www.ft.com/content/9e0e0fc6-ab7d-4b69-a8b1-5a972b82fb06" target="_blank" rel="noopener">Anthropic chief Dario Amodei: ‘I don’t want AI turned on our own people’</a>
+            <div class="meta">
+                <span class="section-tag">Home</span>
+                <span>40m ago</span>
+                
+            </div>
+            <div class="summary-preview">The tech entrepreneur on Claude Mythos, repercussions from the Pentagon dispute — and his message for the super-rich</div>
+        </div>
+        <div class="article" data-title="Olly Robbins’ exit deepens turmoil at Foreign Office" data-summary="Top civil servant had returned to Whitehall from spell in private sector with zeal for cost-cutting and delivery" data-pub="Financial Times" data-published="2026-04-17T11:26:48+00:00">
+            <a href="https://www.ft.com/content/c12defbe-6096-439e-8485-96deca5dffbc" target="_blank" rel="noopener">Olly Robbins’ exit deepens turmoil at Foreign Office</a>
+            <div class="meta">
+                <span class="section-tag">World</span>
+                <span>43m ago</span>
+                
+            </div>
+            <div class="summary-preview">Top civil servant had returned to Whitehall from spell in private sector with zeal for cost-cutting and delivery</div>
+        </div>
+        <div class="article" data-title="Green energy’s fossil fuel problem" data-summary="Sulphur squeeze highlights sector’s exposure to the industry it seeks to replace" data-pub="Financial Times" data-published="2026-04-17T11:03:03+00:00">
+            <a href="https://www.ft.com/content/d521676d-5dce-4855-a189-71f40dfa8e30" target="_blank" rel="noopener">Green energy’s fossil fuel problem</a>
+            <div class="meta">
+                <span class="section-tag">Companies</span>
+                <span>1h ago</span>
+                
+            </div>
+            <div class="summary-preview">Sulphur squeeze highlights sector’s exposure to the industry it seeks to replace</div>
+        </div>
+        <div class="article" data-title="What is a city without children?" data-summary="As urban housebuilding strategies around the world increasingly push families out, the ‘sidewalk ballet’ — and heart — of community life is under threat" data-pub="Financial Times" data-published="2026-04-17T11:00:06+00:00">
+            <a href="https://www.ft.com/content/c4063860-3944-4045-a15e-9f675320f8cb" target="_blank" rel="noopener">What is a city without children?</a>
+            <div class="meta">
+                <span class="section-tag">Companies</span>
+                <span>1h ago</span>
+                
+            </div>
+            <div class="summary-preview">As urban housebuilding strategies around the world increasingly push families out, the ‘sidewalk ballet’ — and heart — of community life is under threat</div>
+        </div>
+        <div class="article" data-title="Rivian pitches big carmakers on software deals" data-summary="Electric truck start-up’s CEO says it is ‘inconceivable’ traditional groups can keep market share without better software" data-pub="Financial Times" data-published="2026-04-17T11:00:05+00:00">
+            <a href="https://www.ft.com/content/bf67c82c-4bdb-4640-a6e0-e75d8391902d" target="_blank" rel="noopener">Rivian pitches big carmakers on software deals</a>
+            <div class="meta">
+                <span class="section-tag">Companies</span>
+                <span>1h ago</span>
+                
+            </div>
+            <div class="summary-preview">Electric truck start-up’s CEO says it is ‘inconceivable’ traditional groups can keep market share without better software</div>
+        </div>
+        <div class="article" data-title="Threat of ‘unprecedented’ Spurs relegation dominates Premier League run-in" data-summary="Despite being one of English football’s Big Six and among Europe’s richest clubs, Tottenham are heading for the drop" data-pub="Financial Times" data-published="2026-04-17T10:48:05+00:00">
+            <a href="https://www.ft.com/content/a8280350-52d5-4942-9b22-6d27fda7b576" target="_blank" rel="noopener">Threat of ‘unprecedented’ Spurs relegation dominates Premier League run-in</a>
+            <div class="meta">
+                <span class="section-tag">Companies</span>
+                <span>1h ago</span>
+                
+            </div>
+            <div class="summary-preview">Despite being one of English football’s Big Six and among Europe’s richest clubs, Tottenham are heading for the drop</div>
+        </div>
+        <div class="article" data-title="Starmer blames ‘unforgivable’ Foreign Office for vetting fiasco" data-summary="PM facing calls to resign after Peter Mandelson revealed to have failed security officials’ checks" data-pub="Financial Times" data-published="2026-04-17T10:40:03+00:00">
+            <a href="https://www.ft.com/content/c49c3c31-1c33-4236-87ab-aefd9bb4c7ee" target="_blank" rel="noopener">Starmer blames ‘unforgivable’ Foreign Office for vetting fiasco</a>
+            <div class="meta">
+                <span class="section-tag">World</span>
+                <span>1h ago</span>
+                
+            </div>
+            <div class="summary-preview">PM facing calls to resign after Peter Mandelson revealed to have failed security officials’ checks</div>
+        </div>
+        <div class="article" data-title="FirstFT: Talks to secure strait as ceasefire takes hold in Lebanon" data-summary="Also in today’s newsletter: Wealthy New Yorkers up in arms over second-home tax and the rising costs of school absenteeism" data-pub="Financial Times" data-published="2026-04-17T10:23:36+00:00">
+            <a href="https://www.ft.com/content/e00d57ef-b8cc-4f20-b6a6-e9c51381c614" target="_blank" rel="noopener">FirstFT: Talks to secure strait as ceasefire takes hold in Lebanon</a>
+            <div class="meta">
+                <span class="section-tag">Companies</span>
+                <span>1h ago</span>
+                
+            </div>
+            <div class="summary-preview">Also in today’s newsletter: Wealthy New Yorkers up in arms over second-home tax and the rising costs of school absenteeism</div>
+        </div>
+        <div class="article" data-title="Deutsche Bank alerts regulators to potential Russia sanctions lapses" data-summary="German bank found it had accepted deposits of more than €100,000 from individuals subject to EU sanctions restrictions" data-pub="Financial Times" data-published="2026-04-17T10:15:54+00:00">
+            <a href="https://www.ft.com/content/14f5c788-eb64-4033-8df8-ca33174b724e" target="_blank" rel="noopener">Deutsche Bank alerts regulators to potential Russia sanctions lapses</a>
+            <div class="meta">
+                <span class="section-tag">Companies</span>
+                <span>1h ago</span>
+                
+            </div>
+            <div class="summary-preview">German bank found it had accepted deposits of more than €100,000 from individuals subject to EU sanctions restrictions</div>
+        </div>
+        <div class="article" data-title="Energy independence could make America more aggressive" data-summary="Being a net exporter means that energy shocks no longer constrain US foreign policy in the ways they once did" data-pub="Financial Times" data-published="2026-04-17T08:43:54+00:00">
+            <a href="https://www.ft.com/content/2c2c6f08-d5c0-41e5-ab0c-1605dba64582" target="_blank" rel="noopener">Energy independence could make America more aggressive</a>
+            <div class="meta">
+                <span class="section-tag">Companies</span>
+                <span>3h ago</span>
+                
+            </div>
+            <div class="summary-preview">Being a net exporter means that energy shocks no longer constrain US foreign policy in the ways they once did</div>
+        </div>
+        <div class="article" data-title="London office landlord Workspace warns of ‘substantial’ profit hit" data-summary="Squeeze from lower rents and higher costs forces company to say it will cut dividend" data-pub="Financial Times" data-published="2026-04-17T08:40:58+00:00">
+            <a href="https://www.ft.com/content/c01d42bd-fa1f-4800-bec2-90dfa747daea" target="_blank" rel="noopener">London office landlord Workspace warns of ‘substantial’ profit hit</a>
+            <div class="meta">
+                <span class="section-tag">Companies</span>
+                <span>3h ago</span>
+                
+            </div>
+            <div class="summary-preview">Squeeze from lower rents and higher costs forces company to say it will cut dividend</div>
+        </div>
+        <div class="article" data-title="Mandelson vetting scandal shows Starmer isn’t up to the job" data-summary="Something has gone badly wrong in communication between Downing Street and government departments" data-pub="Financial Times" data-published="2026-04-17T08:30:03+00:00">
+            <a href="https://www.ft.com/content/9b2d3bb3-b88a-44ff-af6c-ab4702ec03a9" target="_blank" rel="noopener">Mandelson vetting scandal shows Starmer isn’t up to the job</a>
+            <div class="meta">
+                <span class="section-tag">World</span>
+                <span>3h ago</span>
+                
+            </div>
+            <div class="summary-preview">Something has gone badly wrong in communication between Downing Street and government departments</div>
+        </div>
+        <div class="article" data-title="Shares in world’s second-biggest train maker plunge on profit downgrade" data-summary="Alstom cites slow progress on some projects and scraps free cash flow target" data-pub="Financial Times" data-published="2026-04-17T08:23:40+00:00">
+            <a href="https://www.ft.com/content/46436719-f4ce-4196-b0c2-055df28d7955" target="_blank" rel="noopener">Shares in world’s second-biggest train maker plunge on profit downgrade</a>
+            <div class="meta">
+                <span class="section-tag">Companies</span>
+                <span>3h ago</span>
+                
+            </div>
+            <div class="summary-preview">Alstom cites slow progress on some projects and scraps free cash flow target</div>
+        </div>
+        </div>
+    </div>
+    <div class="pub-card">
+        <div class="pub-header" style="background:#472AAF;color:#fff">
+            Bloomberg
+            <span class="count">111 articles</span>
+        </div>
+        <div class="article-list">
+            
+        <div class="article" data-title="Starmer Says He Wasn&#x27;t Told Mandelson Failed Vetting" data-summary="UK Prime Minister Keir Starmer said it’s “unforgivable” that he wasn&#x27;t informed Peter Mandelson had failed security vetting during his appointment as ambassador to the US. &quot;I intend to set out the ful" data-pub="Bloomberg" data-published="2026-04-17T12:02:28+00:00">
+            <a href="https://www.bloomberg.com/news/videos/2026-04-17/starmer-says-he-wasn-t-told-mandelson-failed-vetting-video" target="_blank" rel="noopener">Starmer Says He Wasn&#x27;t Told Mandelson Failed Vetting</a>
+            <div class="meta">
+                <span class="section-tag">Politics</span>
+                <span>8m ago</span>
+                
+            </div>
+            <div class="summary-preview">UK Prime Minister Keir Starmer said it’s “unforgivable” that he wasn&#x27;t informed Peter Mandelson had failed security vetting during his appointment as ambassador to the US. &quot;I intend to set out the ful</div>
+        </div>
+        <div class="article" data-title="From Cars to Cans: How the Iran War Is Affecting World’s Aluminum Supply" data-summary="Aluminum is a ubiquitous metal that’s favored by manufacturers for its abundance and low cost. But the industry is built on a complex and sometimes fragile supply chain." data-pub="Bloomberg" data-published="2026-04-17T12:00:41+00:00">
+            <a href="https://www.bloomberg.com/news/articles/2026-04-17/what-s-happening-to-aluminum-prices-how-iran-war-is-disrupting-global-supply" target="_blank" rel="noopener">From Cars to Cans: How the Iran War Is Affecting World’s Aluminum Supply</a>
+            <div class="meta">
+                <span class="section-tag">Markets</span>
+                <span>9m ago</span>
+                <span>Mark Burton, Jack Farchy, Martin Ritchie</span>
+            </div>
+            <div class="summary-preview">Aluminum is a ubiquitous metal that’s favored by manufacturers for its abundance and low cost. But the industry is built on a complex and sometimes fragile supply chain.</div>
+        </div>
+        <div class="article" data-title="European Power Prices Set to Close Week Below Pre-War Levels" data-summary="European power futures are trading below where they were before the Middle East war began, amid a surge in renewables generation coupled with easing gas prices driven by optimism over a ceasefire." data-pub="Bloomberg" data-published="2026-04-17T11:54:17+00:00">
+            <a href="https://www.bloomberg.com/news/articles/2026-04-17/european-power-prices-set-to-close-week-below-pre-war-levels" target="_blank" rel="noopener">European Power Prices Set to Close Week Below Pre-War Levels</a>
+            <div class="meta">
+                <span class="section-tag">Markets</span>
+                <span>16m ago</span>
+                <span>Eamon Farhat</span>
+            </div>
+            <div class="summary-preview">European power futures are trading below where they were before the Middle East war began, amid a surge in renewables generation coupled with easing gas prices driven by optimism over a ceasefire.</div>
+        </div>
+        <div class="article" data-title="US Premarket Movers: Alcoa, Ally Financial, Netflix, NiSource" data-summary="S&amp;P 500 Index futures rise 0.3% as of 7:45 a.m. in New York as traders add more risk after the market’s rally." data-pub="Bloomberg" data-published="2026-04-17T11:45:33+00:00">
+            <a href="https://www.bloomberg.com/news/articles/2026-04-17/us-stock-futures-today-alcoa-ally-financial-netflix-nisource" target="_blank" rel="noopener">US Premarket Movers: Alcoa, Ally Financial, Netflix, NiSource</a>
+            <div class="meta">
+                <span class="section-tag">Markets</span>
+                <span>24m ago</span>
+                <span>Will Daley</span>
+            </div>
+            <div class="summary-preview">S&amp;P 500 Index futures rise 0.3% as of 7:45 a.m. in New York as traders add more risk after the market’s rally.</div>
+        </div>
+        <div class="article" data-title="BlackRock’s Rieder Says Equity Technicals Are Extraordinary" data-summary="Rick Rieder, global fixed income CIO and head of the global allocation team at BlackRock, sees equities being driven by a combination of “amazing” technicals and “pretty powerful” earnings. (Source: B" data-pub="Bloomberg" data-published="2026-04-17T11:43:28+00:00">
+            <a href="https://www.bloomberg.com/news/videos/2026-04-17/blackrock-s-rieder-equity-technicals-are-extraordinary-video" target="_blank" rel="noopener">BlackRock’s Rieder Says Equity Technicals Are Extraordinary</a>
+            <div class="meta">
+                <span class="section-tag">Markets</span>
+                <span>27m ago</span>
+                
+            </div>
+            <div class="summary-preview">Rick Rieder, global fixed income CIO and head of the global allocation team at BlackRock, sees equities being driven by a combination of “amazing” technicals and “pretty powerful” earnings. (Source: B</div>
+        </div>
+        <div class="article" data-title="Anthropic’s Mythos: What It Is and What It Is Capable of" data-summary="Gregory Allen, senior adviser at CSIS Wadhwani AI Center, examines the capabilities of Anthropic’s Mythos model and how AI is being used by the US military to intensify strikes in the Iran war. (Sourc" data-pub="Bloomberg" data-published="2026-04-17T11:36:24+00:00">
+            <a href="https://www.bloomberg.com/news/videos/2026-04-17/anthropic-s-mythos-what-it-is-and-what-is-it-capable-of-video" target="_blank" rel="noopener">Anthropic’s Mythos: What It Is and What It Is Capable of</a>
+            <div class="meta">
+                <span class="section-tag">Technology</span>
+                <span>34m ago</span>
+                
+            </div>
+            <div class="summary-preview">Gregory Allen, senior adviser at CSIS Wadhwani AI Center, examines the capabilities of Anthropic’s Mythos model and how AI is being used by the US military to intensify strikes in the Iran war. (Sourc</div>
+        </div>
+        <div class="article" data-title="Gas Prices Undercut Trump’s Sunny Economic Message" data-summary="Fuel increases don’t hit Americans equally" data-pub="Bloomberg" data-published="2026-04-17T11:34:54+00:00">
+            <a href="https://www.bloomberg.com/news/newsletters/2026-04-17/gas-prices-are-battling-tax-refunds-for-consumer-sentiment" target="_blank" rel="noopener">Gas Prices Undercut Trump’s Sunny Economic Message</a>
+            <div class="meta">
+                <span class="section-tag">Politics</span>
+                <span>35m ago</span>
+                <span>Jonathan Tamari</span>
+            </div>
+            <div class="summary-preview">Fuel increases don’t hit Americans equally</div>
+        </div>
+        <div class="article" data-title="Second Mali Gold Mine Scores Backing From Former Olam Exec" data-summary="The family office of Indian businessman Gagan Gupta has agreed to fund a second gold mine in Mali, providing a boost to a government that’s been at loggerheads with mining investors in recent years." data-pub="Bloomberg" data-published="2026-04-17T11:34:43+00:00">
+            <a href="https://www.bloomberg.com/news/articles/2026-04-17/second-mali-gold-mine-scores-backing-from-former-olam-exec" target="_blank" rel="noopener">Second Mali Gold Mine Scores Backing From Former Olam Exec</a>
+            <div class="meta">
+                <span class="section-tag">Markets</span>
+                <span>35m ago</span>
+                <span>William Clowes</span>
+            </div>
+            <div class="summary-preview">The family office of Indian businessman Gagan Gupta has agreed to fund a second gold mine in Mali, providing a boost to a government that’s been at loggerheads with mining investors in recent years.</div>
+        </div>
+        <div class="article" data-title="Nike’s Spiraling Stock Has Wall Street Questioning Comeback Plan" data-summary="Wall Street is souring on Nike Inc. as concerns over its ability to revamp its business have driven the stock to levels not seen in more than a decade." data-pub="Bloomberg" data-published="2026-04-17T11:30:05+00:00">
+            <a href="https://www.bloomberg.com/news/articles/2026-04-17/nike-s-spiraling-stock-has-wall-street-questioning-comeback-plan" target="_blank" rel="noopener">Nike’s Spiraling Stock Has Wall Street Questioning Comeback Plan</a>
+            <div class="meta">
+                <span class="section-tag">Markets</span>
+                <span>40m ago</span>
+                <span>Peyton Forte</span>
+            </div>
+            <div class="summary-preview">Wall Street is souring on Nike Inc. as concerns over its ability to revamp its business have driven the stock to levels not seen in more than a decade.</div>
+        </div>
+        <div class="article" data-title="Canada Rethinks Global Telecom Networks Amid Rising US Tensions" data-summary="Ever since Donald Trump returned to power and began to make threats against traditional US allies, officials in Canada’s capital have been figuring out what the country’s vulnerabilities are. Here’s a" data-pub="Bloomberg" data-published="2026-04-17T11:30:00+00:00">
+            <a href="https://www.bloomberg.com/news/articles/2026-04-17/canada-rethinks-global-telecom-networks-amid-rising-us-tensions" target="_blank" rel="noopener">Canada Rethinks Global Telecom Networks Amid Rising US Tensions</a>
+            <div class="meta">
+                <span class="section-tag">Politics</span>
+                <span>40m ago</span>
+                <span>Mathieu Dion</span>
+            </div>
+            <div class="summary-preview">Ever since Donald Trump returned to power and began to make threats against traditional US allies, officials in Canada’s capital have been figuring out what the country’s vulnerabilities are. Here’s a</div>
+        </div>
+        <div class="article" data-title="Estonia Says US Warns of Arms Sales Challenges Amid Gulf Crisis" data-summary="The US has informed Estonia of a supply challenge in weapons sales to its partners, Estonian Prime Minister Kristen Michal said." data-pub="Bloomberg" data-published="2026-04-17T11:20:59+00:00">
+            <a href="https://www.bloomberg.com/news/articles/2026-04-17/estonia-says-us-warns-of-arms-sales-challenges-amid-gulf-crisis" target="_blank" rel="noopener">Estonia Says US Warns of Arms Sales Challenges Amid Gulf Crisis</a>
+            <div class="meta">
+                <span class="section-tag">Politics</span>
+                <span>49m ago</span>
+                <span>Ott Tammik</span>
+            </div>
+            <div class="summary-preview">The US has informed Estonia of a supply challenge in weapons sales to its partners, Estonian Prime Minister Kristen Michal said.</div>
+        </div>
+        <div class="article" data-title="Wartime Supply Crunch Dents LNG’s Appeal to Importers in Asia" data-summary="Without guarantees on delivery and price, emerging economies are seeking alternatives to the fuel." data-pub="Bloomberg" data-published="2026-04-17T11:15:00+00:00">
+            <a href="https://www.bloomberg.com/news/newsletters/2026-04-17/wartime-supply-crunch-dents-lng-s-appeal-to-importers-in-asia" target="_blank" rel="noopener">Wartime Supply Crunch Dents LNG’s Appeal to Importers in Asia</a>
+            <div class="meta">
+                <span class="section-tag">Markets</span>
+                <span>55m ago</span>
+                <span>Stephen Stapczynski</span>
+            </div>
+            <div class="summary-preview">Without guarantees on delivery and price, emerging economies are seeking alternatives to the fuel.</div>
+        </div>
+        <div class="article" data-title="China Fines Alibaba and PDD for Food Delivery Oversight Failures" data-summary="Chinese regulators fined leading food delivery platforms including Alibaba Group Holding Ltd., PDD Holdings Inc. and Meituan for failing to filter out unqualified merchants." data-pub="Bloomberg" data-published="2026-04-17T11:13:37+00:00">
+            <a href="https://www.bloomberg.com/news/articles/2026-04-17/china-fines-alibaba-and-pdd-for-food-delivery-oversight-failures" target="_blank" rel="noopener">China Fines Alibaba and PDD for Food Delivery Oversight Failures</a>
+            <div class="meta">
+                <span class="section-tag">Technology</span>
+                <span>56m ago</span>
+                <span>Luz Ding</span>
+            </div>
+            <div class="summary-preview">Chinese regulators fined leading food delivery platforms including Alibaba Group Holding Ltd., PDD Holdings Inc. and Meituan for failing to filter out unqualified merchants.</div>
+        </div>
+        <div class="article" data-title="Trump Says Iran Deal Getting Closer; Netflix Drops On Outlook Miss | Bloomberg Brief 4/17/2026" data-summary="US equity futures rise after the S&amp;P 500 and Nasdaq 100 hit fresh record highs. President Trump says a peace deal with Iran could come &quot;fairly soon.&quot; Shares of Netflix extend decline after the streami" data-pub="Bloomberg" data-published="2026-04-17T11:08:47+00:00">
+            <a href="https://www.bloomberg.com/news/videos/2026-04-17/bloomberg-brief-4-17-2026-video" target="_blank" rel="noopener">Trump Says Iran Deal Getting Closer; Netflix Drops On Outlook Miss | Bloomberg Brief 4/17/2026</a>
+            <div class="meta">
+                <span class="section-tag">Markets</span>
+                <span>1h ago</span>
+                
+            </div>
+            <div class="summary-preview">US equity futures rise after the S&amp;P 500 and Nasdaq 100 hit fresh record highs. President Trump says a peace deal with Iran could come &quot;fairly soon.&quot; Shares of Netflix extend decline after the streami</div>
+        </div>
+        <div class="article" data-title="Goldman Warns Continued Market Recovery Hinges on Rates Relief" data-summary="The recent stock market rally that has driven both the S&amp;P 500 and Nasdaq 100 to records needs central banks to pivot back toward rate cuts to sustain its momentum, according to Christian Mueller-Glis" data-pub="Bloomberg" data-published="2026-04-17T11:04:04+00:00">
+            <a href="https://www.bloomberg.com/news/articles/2026-04-17/goldman-warns-continued-market-recovery-hinges-on-rates-relief" target="_blank" rel="noopener">Goldman Warns Continued Market Recovery Hinges on Rates Relief</a>
+            <div class="meta">
+                <span class="section-tag">Markets</span>
+                <span>1h ago</span>
+                <span>Dara Doyle, Anna Edwards</span>
+            </div>
+            <div class="summary-preview">The recent stock market rally that has driven both the S&amp;P 500 and Nasdaq 100 to records needs central banks to pivot back toward rate cuts to sustain its momentum, according to Christian Mueller-Glis</div>
+        </div>
+        </div>
+    </div>
+    <div class="pub-card">
+        <div class="pub-header" style="background:#0080C3;color:#fff">
+            Wall Street Journal
+            <span class="count">197 articles</span>
+        </div>
+        <div class="article-list">
+            
+        <div class="article" data-title="State Street Profit Rises On Fee Growth" data-summary="State Street reported higher first-quarter profit, boosted by fee growth, particularly for its foreign exchange trading services." data-pub="Wall Street Journal" data-published="2026-04-17T12:03:00+00:00">
+            <a href="https://www.wsj.com/business/earnings/state-street-profit-rises-on-fee-growth-6e5ddd76?mod=rss_markets_main" target="_blank" rel="noopener">State Street Profit Rises On Fee Growth</a>
+            <div class="meta">
+                <span class="section-tag">Markets</span>
+                <span>7m ago</span>
+                <span>Nicholas G. Miller</span>
+            </div>
+            <div class="summary-preview">State Street reported higher first-quarter profit, boosted by fee growth, particularly for its foreign exchange trading services.</div>
+        </div>
+        <div class="article" data-title="State Street Profit Rises On Fee Growth" data-summary="State Street reported higher first-quarter profit, boosted by fee growth, particularly for its foreign exchange trading services." data-pub="Wall Street Journal" data-published="2026-04-17T12:03:00+00:00">
+            <a href="https://www.wsj.com/business/earnings/state-street-profit-rises-on-fee-growth-6e5ddd76?mod=pls_whats_news_us_business_f" target="_blank" rel="noopener">State Street Profit Rises On Fee Growth</a>
+            <div class="meta">
+                <span class="section-tag">US Business</span>
+                <span>7m ago</span>
+                <span>Nicholas G. Miller</span>
+            </div>
+            <div class="summary-preview">State Street reported higher first-quarter profit, boosted by fee growth, particularly for its foreign exchange trading services.</div>
+        </div>
+        <div class="article" data-title="U.K.’s Starmer Under Fresh Scrutiny Over Epstein Fallout" data-summary="Keir Starmer denies knowing that disgraced former U.S. envoy Peter Mandelson—a friend of Epstein—hadn’t been cleared by security vetting." data-pub="Wall Street Journal" data-published="2026-04-17T11:58:00+00:00">
+            <a href="https://www.wsj.com/world/uk/u-k-s-starmer-under-fresh-scrutiny-over-epstein-fallout-ab3cb30f" target="_blank" rel="noopener">U.K.’s Starmer Under Fresh Scrutiny Over Epstein Fallout</a>
+            <div class="meta">
+                <span class="section-tag">World</span>
+                <span>12m ago</span>
+                <span>David Luhnow</span>
+            </div>
+            <div class="summary-preview">Keir Starmer denies knowing that disgraced former U.S. envoy Peter Mandelson—a friend of Epstein—hadn’t been cleared by security vetting.</div>
+        </div>
+        <div class="article" data-title="Chocolate Makers Look to Cut Down on Cocoa After Price Volatility" data-summary="Higher prices pushed chocolatiers to use ingredients other than cocoa or develop the raw material in labs. Some are in no rush to add cocoa back." data-pub="Wall Street Journal" data-published="2026-04-17T11:31:00+00:00">
+            <a href="https://www.wsj.com/business/chocolate-makers-look-to-cut-down-on-cocoa-after-price-volatility-6629fb6a?mod=rss_markets_main" target="_blank" rel="noopener">Chocolate Makers Look to Cut Down on Cocoa After Price Volatility</a>
+            <div class="meta">
+                <span class="section-tag">Markets</span>
+                <span>39m ago</span>
+                <span>Joe Stonor</span>
+            </div>
+            <div class="summary-preview">Higher prices pushed chocolatiers to use ingredients other than cocoa or develop the raw material in labs. Some are in no rush to add cocoa back.</div>
+        </div>
+        <div class="article" data-title="Chocolate Makers Look to Cut Down on Cocoa After Price Volatility" data-summary="Higher prices pushed chocolatiers to use ingredients other than cocoa or develop the raw material in labs. Some are in no rush to add cocoa back." data-pub="Wall Street Journal" data-published="2026-04-17T11:31:00+00:00">
+            <a href="https://www.wsj.com/business/chocolate-makers-look-to-cut-down-on-cocoa-after-price-volatility-6629fb6a?mod=pls_whats_news_us_business_f" target="_blank" rel="noopener">Chocolate Makers Look to Cut Down on Cocoa After Price Volatility</a>
+            <div class="meta">
+                <span class="section-tag">US Business</span>
+                <span>39m ago</span>
+                <span>Joe Stonor</span>
+            </div>
+            <div class="summary-preview">Higher prices pushed chocolatiers to use ingredients other than cocoa or develop the raw material in labs. Some are in no rush to add cocoa back.</div>
+        </div>
+        <div class="article" data-title="Ford Recalls Up to 1.39 Million F-150s" data-summary="Ford is recalling up to 1.39 million F-150 pick-ups over the risk of unexpected downshifting that can lead to a loss of vehicle control." data-pub="Wall Street Journal" data-published="2026-04-17T11:27:00+00:00">
+            <a href="https://www.wsj.com/business/autos/ford-recalls-up-to-1-39-million-f-150s-a4670d9c?mod=rss_markets_main" target="_blank" rel="noopener">Ford Recalls Up to 1.39 Million F-150s</a>
+            <div class="meta">
+                <span class="section-tag">Markets</span>
+                <span>43m ago</span>
+                <span>Nicholas G. Miller</span>
+            </div>
+            <div class="summary-preview">Ford is recalling up to 1.39 million F-150 pick-ups over the risk of unexpected downshifting that can lead to a loss of vehicle control.</div>
+        </div>
+        <div class="article" data-title="Ford Recalls Up to 1.39 Million F-150s" data-summary="Ford is recalling up to 1.39 million F-150 pick-ups over the risk of unexpected downshifting that can lead to a loss of vehicle control." data-pub="Wall Street Journal" data-published="2026-04-17T11:27:00+00:00">
+            <a href="https://www.wsj.com/business/autos/ford-recalls-up-to-1-39-million-f-150s-a4670d9c?mod=pls_whats_news_us_business_f" target="_blank" rel="noopener">Ford Recalls Up to 1.39 Million F-150s</a>
+            <div class="meta">
+                <span class="section-tag">US Business</span>
+                <span>43m ago</span>
+                <span>Nicholas G. Miller</span>
+            </div>
+            <div class="summary-preview">Ford is recalling up to 1.39 million F-150 pick-ups over the risk of unexpected downshifting that can lead to a loss of vehicle control.</div>
+        </div>
+        <div class="article" data-title="Gold Upside Seen Limited as War Outlook Remains Uncertain" data-summary="Gold prices were on track for a weekly gain on optimism surrounding U.S.-Iran negotiations, though further gains might be limited until there is clearer direction on developments." data-pub="Wall Street Journal" data-published="2026-04-17T11:26:00+00:00">
+            <a href="https://www.wsj.com/finance/commodities-futures/gold-edges-higher-on-hopes-for-u-s-iran-deal-52ac078d?mod=rss_markets_main" target="_blank" rel="noopener">Gold Upside Seen Limited as War Outlook Remains Uncertain</a>
+            <div class="meta">
+                <span class="section-tag">Markets</span>
+                <span>44m ago</span>
+                
+            </div>
+            <div class="summary-preview">Gold prices were on track for a weekly gain on optimism surrounding U.S.-Iran negotiations, though further gains might be limited until there is clearer direction on developments.</div>
+        </div>
+        <div class="article" data-title="Dollar Showing Negative Correlation to Equities Amid Iran War" data-summary="The DXY dollar index fell 0.1% and the risk on-risk off relationship between the dollar and equity markets once again a key feature of currency markets, according to Validus Risk Management." data-pub="Wall Street Journal" data-published="2026-04-17T11:23:00+00:00">
+            <a href="https://www.wsj.com/finance/currencies/asian-currencies-consolidate-as-traders-assess-middle-east-developments-883baa0d?mod=rss_markets_main" target="_blank" rel="noopener">Dollar Showing Negative Correlation to Equities Amid Iran War</a>
+            <div class="meta">
+                <span class="section-tag">Markets</span>
+                <span>47m ago</span>
+                
+            </div>
+            <div class="summary-preview">The DXY dollar index fell 0.1% and the risk on-risk off relationship between the dollar and equity markets once again a key feature of currency markets, according to Validus Risk Management.</div>
+        </div>
+        <div class="article" data-title="Oil Falls Further on U.S.-Iran Negotiation Hopes" data-summary="Oil prices extended losses on hopes that the U.S. and Iran will soon meet for a second round of talks." data-pub="Wall Street Journal" data-published="2026-04-17T11:16:00+00:00">
+            <a href="https://www.wsj.com/finance/commodities-futures/oil-falls-amid-signs-of-potential-u-s-iran-deal-6b28cbeb?mod=rss_markets_main" target="_blank" rel="noopener">Oil Falls Further on U.S.-Iran Negotiation Hopes</a>
+            <div class="meta">
+                <span class="section-tag">Markets</span>
+                <span>54m ago</span>
+                
+            </div>
+            <div class="summary-preview">Oil prices extended losses on hopes that the U.S. and Iran will soon meet for a second round of talks.</div>
+        </div>
+        <div class="article" data-title="Telecom Majors Bid $24 Billion for Patrick Drahi’s SFR" data-summary="The French-Israeli billionaire’s Altice business is under pressure to reduce its debt burden." data-pub="Wall Street Journal" data-published="2026-04-17T10:42:00+00:00">
+            <a href="https://www.wsj.com/business/telecom/bouygues-orange-iliad-in-24-billion-talks-to-buy-altices-french-telecoms-assets-530a017f?mod=pls_whats_news_us_business_f" target="_blank" rel="noopener">Telecom Majors Bid $24 Billion for Patrick Drahi’s SFR</a>
+            <div class="meta">
+                <span class="section-tag">US Business</span>
+                <span>1h ago</span>
+                <span>Elena Vardon</span>
+            </div>
+            <div class="summary-preview">The French-Israeli billionaire’s Altice business is under pressure to reduce its debt burden.</div>
+        </div>
+        <div class="article" data-title="Autoliv Backs Guidance Despite Caution Over Geopolitical Challenges" data-summary="Shares rose 9% in Stockholm after the company’s first quarter turned out better than anticipated, with strong sales in March." data-pub="Wall Street Journal" data-published="2026-04-17T10:38:00+00:00">
+            <a href="https://www.wsj.com/business/earnings/autoliv-backs-guidance-despite-caution-over-geopolitical-challenges-5c29e362?mod=pls_whats_news_us_business_f" target="_blank" rel="noopener">Autoliv Backs Guidance Despite Caution Over Geopolitical Challenges</a>
+            <div class="meta">
+                <span class="section-tag">US Business</span>
+                <span>1h ago</span>
+                <span>Dominic Chopping</span>
+            </div>
+            <div class="summary-preview">Shares rose 9% in Stockholm after the company’s first quarter turned out better than anticipated, with strong sales in March.</div>
+        </div>
+        <div class="article" data-title="Star Managers Can Be Dangerous to Your Wealth" data-summary="Plus, Netflix and spill" data-pub="Wall Street Journal" data-published="2026-04-17T10:25:00+00:00">
+            <a href="https://www.wsj.com/finance/stocks/star-managers-can-be-dangerous-to-your-wealth-59739458?mod=rss_markets_main" target="_blank" rel="noopener">Star Managers Can Be Dangerous to Your Wealth</a>
+            <div class="meta">
+                <span class="section-tag">Markets</span>
+                <span>1h ago</span>
+                <span>Spencer Jakab</span>
+            </div>
+            <div class="summary-preview">Plus, Netflix and spill</div>
+        </div>
+        <div class="article" data-title="Basic Materials Roundup: Market Talk" data-summary="Find insight on Ganfeng Lithium and more in the latest Market Talks covering basic materials." data-pub="Wall Street Journal" data-published="2026-04-17T10:20:00+00:00">
+            <a href="https://www.wsj.com/business/basic-materials-roundup-market-talk-c83db212?mod=pls_whats_news_us_business_f" target="_blank" rel="noopener">Basic Materials Roundup: Market Talk</a>
+            <div class="meta">
+                <span class="section-tag">US Business</span>
+                <span>1h ago</span>
+                
+            </div>
+            <div class="summary-preview">Find insight on Ganfeng Lithium and more in the latest Market Talks covering basic materials.</div>
+        </div>
+        <div class="article" data-title="The Trump Doctrine in Action" data-summary="Major military operations in Venezuela and Iran make America, and the world, safer." data-pub="Wall Street Journal" data-published="2026-04-17T10:16:00+00:00">
+            <a href="https://www.wsj.com/opinion/free-expression/the-trump-doctrine-in-action-5649fb01" target="_blank" rel="noopener">The Trump Doctrine in Action</a>
+            <div class="meta">
+                <span class="section-tag">Opinion</span>
+                <span>1h ago</span>
+                <span>Matthew Continetti</span>
+            </div>
+            <div class="summary-preview">Major military operations in Venezuela and Iran make America, and the world, safer.</div>
+        </div>
+        </div>
+    </div>
+    <div class="pub-card">
+        <div class="pub-header" style="background:#1A1A1A;color:#fff">
+            New York Times
+            <span class="count">134 articles</span>
+        </div>
+        <div class="article-list">
+            
+        <div class="article" data-title="Washington’s Scramble to Get Mythos, Anthropic’s Powerful New Model" data-summary="Federal agencies have requested access to Claude Mythos Preview, which Anthropic says can rapidly identify — and potentially create — new cyberthreats." data-pub="New York Times" data-published="2026-04-17T11:51:45+00:00">
+            <a href="https://www.nytimes.com/2026/04/17/business/dealbook/washington-anthropic-mythos.html" target="_blank" rel="noopener">Washington’s Scramble to Get Mythos, Anthropic’s Powerful New Model</a>
+            <div class="meta">
+                <span class="section-tag">Business</span>
+                <span>18m ago</span>
+                <span>Andrew Ross Sorkin, Bernhard Warner, Sarah Kessler, Michael J. de la Merced, Niko Gallogly and Brian O’Keefe</span>
+            </div>
+            <div class="summary-preview">Federal agencies have requested access to Claude Mythos Preview, which Anthropic says can rapidly identify — and potentially create — new cyberthreats.</div>
+        </div>
+        <div class="article" data-title="Starmer Fires Senior U.K. Civil Servant Over Mandelson Revelations" data-summary="Prime Minister Keir Starmer’s office confirmed that Peter Mandelson, a Jeffrey Epstein associate, failed security checks before he became Britain’s envoy to Washington." data-pub="New York Times" data-published="2026-04-17T11:49:53+00:00">
+            <a href="https://www.nytimes.com/2026/04/17/world/europe/uk-starmer-mandelson-foreign-office-robbins-fired.html" target="_blank" rel="noopener">Starmer Fires Senior U.K. Civil Servant Over Mandelson Revelations</a>
+            <div class="meta">
+                <span class="section-tag">Home</span>
+                <span>20m ago</span>
+                <span>Michael D. Shear</span>
+            </div>
+            <div class="summary-preview">Prime Minister Keir Starmer’s office confirmed that Peter Mandelson, a Jeffrey Epstein associate, failed security checks before he became Britain’s envoy to Washington.</div>
+        </div>
+        <div class="article" data-title="‘I Just Want to Be Back’: Thousands Rush South in Lebanon Under Cease-Fire" data-summary="Stuck in standstill traffic, Lebanese people who had been displaced by fighting expressed a mix of excitement and uncertainty about a pause in Israel’s campaign against Hezbollah." data-pub="New York Times" data-published="2026-04-17T11:46:04+00:00">
+            <a href="https://www.nytimes.com/2026/04/17/world/middleeast/lebanon-cease-fire-traffic-south.html" target="_blank" rel="noopener">‘I Just Want to Be Back’: Thousands Rush South in Lebanon Under Cease-Fire</a>
+            <div class="meta">
+                <span class="section-tag">World</span>
+                <span>24m ago</span>
+                <span>Christina Goldbaum, Hwaida Saad and David Guttenfelder</span>
+            </div>
+            <div class="summary-preview">Stuck in standstill traffic, Lebanese people who had been displaced by fighting expressed a mix of excitement and uncertainty about a pause in Israel’s campaign against Hezbollah.</div>
+        </div>
+        <div class="article" data-title="In northern Israel, relief at the cease-fire is overshadowed by unease." data-summary="Residents are wary that the truce may offer only a temporary reprieve after weeks of rocket fire by Hezbollah." data-pub="New York Times" data-published="2026-04-17T11:38:11+00:00">
+            <a href="https://www.nytimes.com/live/2026/04/17/world/israel-lebanon-ceasefire-hezbollah/israel-residents-ceasefire-lebanon-hezbollah" target="_blank" rel="noopener">In northern Israel, relief at the cease-fire is overshadowed by unease.</a>
+            <div class="meta">
+                <span class="section-tag">World</span>
+                <span>32m ago</span>
+                <span>Johnatan Reiss</span>
+            </div>
+            <div class="summary-preview">Residents are wary that the truce may offer only a temporary reprieve after weeks of rocket fire by Hezbollah.</div>
+        </div>
+        <div class="article" data-title="Here’s the latest." data-summary="" data-pub="New York Times" data-published="2026-04-17T11:30:55+00:00">
+            <a href="https://www.nytimes.com/live/2026/04/17/world/israel-lebanon-ceasefire-hezbollah/heres-the-latest" target="_blank" rel="noopener">Here’s the latest.</a>
+            <div class="meta">
+                <span class="section-tag">World</span>
+                <span>39m ago</span>
+                <span>Christina Goldbaum, Euan Ward, Johnatan Reiss and Max Bearak</span>
+            </div>
+            <div class="summary-preview"></div>
+        </div>
+        <div class="article" data-title="Our Tax System Should Make You Furious" data-summary="The tax expert Ray Madoff explains why the American tax system is broken, and how to make it fairer." data-pub="New York Times" data-published="2026-04-17T11:20:23+00:00">
+            <a href="https://www.nytimes.com/2026/04/17/opinion/ezra-klein-podcast-ray-madoff.html" target="_blank" rel="noopener">Our Tax System Should Make You Furious</a>
+            <div class="meta">
+                <span class="section-tag">Home</span>
+                <span>50m ago</span>
+                <span>Ezra Klein and Rollin Hu</span>
+            </div>
+            <div class="summary-preview">The tax expert Ray Madoff explains why the American tax system is broken, and how to make it fairer.</div>
+        </div>
+        <div class="article" data-title="Israel-Lebanon Cease-Fire: What to Know" data-summary="The pause in fighting would remove a major hindrance to the U.S.-Iran peace talks, if it holds." data-pub="New York Times" data-published="2026-04-17T11:18:59+00:00">
+            <a href="https://www.nytimes.com/2026/04/17/world/middleeast/israel-lebanon-ceasefire.html" target="_blank" rel="noopener">Israel-Lebanon Cease-Fire: What to Know</a>
+            <div class="meta">
+                <span class="section-tag">Home</span>
+                <span>51m ago</span>
+                <span>Lynsey Chutel</span>
+            </div>
+            <div class="summary-preview">The pause in fighting would remove a major hindrance to the U.S.-Iran peace talks, if it holds.</div>
+        </div>
+        <div class="article" data-title="Texas Restaurant Owners Call for Work Permits as Immigration Crackdown Strains Industry" data-summary="Restaurant operators say labor shortages, rising costs and worker fear have prompted an unusual alliance of industry and political leaders in Texas to call for legal pathways to hire immigrants." data-pub="New York Times" data-published="2026-04-17T11:12:35+00:00">
+            <a href="https://www.nytimes.com/2026/04/17/us/texas-restaurants-immigration-work-permits.html" target="_blank" rel="noopener">Texas Restaurant Owners Call for Work Permits as Immigration Crackdown Strains Industry</a>
+            <div class="meta">
+                <span class="section-tag">Home</span>
+                <span>57m ago</span>
+                <span>Jesus Jiménez</span>
+            </div>
+            <div class="summary-preview">Restaurant operators say labor shortages, rising costs and worker fear have prompted an unusual alliance of industry and political leaders in Texas to call for legal pathways to hire immigrants.</div>
+        </div>
+        <div class="article" data-title="A.I. Backlash Turns Violent + Kara Swisher on Healthmaxxing + The Zuck Bot Is Coming" data-summary="Is anti-A.I. radicalization a growing trend?" data-pub="New York Times" data-published="2026-04-17T11:00:03+00:00">
+            <a href="https://www.nytimes.com/2026/04/17/podcasts/hardfork-ai-backlash.html" target="_blank" rel="noopener">A.I. Backlash Turns Violent + Kara Swisher on Healthmaxxing + The Zuck Bot Is Coming</a>
+            <div class="meta">
+                <span class="section-tag">Technology</span>
+                <span>1h ago</span>
+                <span>Kevin Roose, Casey Newton, Whitney Jones, Rachel Cohn, Vjeran Pavic, Chris Wood, Dan Powell, Elisheba Ittoop, Marion Lozano, Rowan Niemisto and Alyssa Moxley</span>
+            </div>
+            <div class="summary-preview">Is anti-A.I. radicalization a growing trend?</div>
+        </div>
+        <div class="article" data-title="A Huge Arch" data-summary="President Trump wants to build one, but he’s getting pushback." data-pub="New York Times" data-published="2026-04-17T10:49:23+00:00">
+            <a href="https://www.nytimes.com/2026/04/17/briefing/a-huge-arch.html" target="_blank" rel="noopener">A Huge Arch</a>
+            <div class="meta">
+                <span class="section-tag">Home</span>
+                <span>1h ago</span>
+                <span>Sam Sifton</span>
+            </div>
+            <div class="summary-preview">President Trump wants to build one, but he’s getting pushback.</div>
+        </div>
+        <div class="article" data-title="Lebanon’s Cease-Fire Buys Time, Not a Way Out" data-summary="The country’s leaders secured a truce through risky talks with Israel, but the government now finds itself caught between competing pressures." data-pub="New York Times" data-published="2026-04-17T10:10:32+00:00">
+            <a href="https://www.nytimes.com/2026/04/17/world/middleeast/lebanon-israel-ceasefire-hezbollah.html" target="_blank" rel="noopener">Lebanon’s Cease-Fire Buys Time, Not a Way Out</a>
+            <div class="meta">
+                <span class="section-tag">Home</span>
+                <span>1h ago</span>
+                <span>Euan Ward</span>
+            </div>
+            <div class="summary-preview">The country’s leaders secured a truce through risky talks with Israel, but the government now finds itself caught between competing pressures.</div>
+        </div>
+        <div class="article" data-title="What to Know About the Israel-Lebanon Cease-Fire, and R.F.K. Jr.’s Shifting Tone on Vaccines" data-summary="Plus, the Friday news quiz." data-pub="New York Times" data-published="2026-04-17T10:00:10+00:00">
+            <a href="https://www.nytimes.com/2026/04/17/podcasts/the-headlines/israel-lebanon-cease-fire-rfk-jr-vaccines-heelys.html" target="_blank" rel="noopener">What to Know About the Israel-Lebanon Cease-Fire, and R.F.K. Jr.’s Shifting Tone on Vaccines</a>
+            <div class="meta">
+                <span class="section-tag">Home</span>
+                <span>2h ago</span>
+                <span>Tracy Mumford, Will Jarvis, Margaret Kadifa, Ian Stewart, Christina Goldbaum and Ash Wu</span>
+            </div>
+            <div class="summary-preview">Plus, the Friday news quiz.</div>
+        </div>
+        <div class="article" data-title="Trump says he might go to Pakistan if an Iran deal is signed there." data-summary="" data-pub="New York Times" data-published="2026-04-17T09:50:42+00:00">
+            <a href="https://www.nytimes.com/live/2026/04/17/world/iran-us-war-trump/trump-says-he-might-go-to-pakistan-if-an-iran-deal-were-signed-there" target="_blank" rel="noopener">Trump says he might go to Pakistan if an Iran deal is signed there.</a>
+            <div class="meta">
+                <span class="section-tag">World</span>
+                <span>2h ago</span>
+                <span>Tyler Pager and Chris Cameron</span>
+            </div>
+            <div class="summary-preview"></div>
+        </div>
+        <div class="article" data-title="Lebanon-Israel Cease-Fire Goes Into Effect" data-summary="It was unclear if the agreement between Prime Minister Benjamin Netanyahu and the Lebanese government was being honored. Hezbollah, the Iranian-backed militia, acknowledged the temporary truce but did" data-pub="New York Times" data-published="2026-04-17T09:46:25+00:00">
+            <a href="https://www.nytimes.com/live/2026/04/16/world/iran-war-trump-lebanon-news" target="_blank" rel="noopener">Lebanon-Israel Cease-Fire Goes Into Effect</a>
+            <div class="meta">
+                <span class="section-tag">World</span>
+                <span>2h ago</span>
+                <span>The New York Times</span>
+            </div>
+            <div class="summary-preview">It was unclear if the agreement between Prime Minister Benjamin Netanyahu and the Lebanese government was being honored. Hezbollah, the Iranian-backed militia, acknowledged the temporary truce but did</div>
+        </div>
+        <div class="article" data-title="Midwest Forecast to See Strong Storms on Friday" data-summary="The Midwest has faced day after day of weather warnings this week. More are expected on Friday." data-pub="New York Times" data-published="2026-04-17T09:30:07+00:00">
+            <a href="https://www.nytimes.com/2026/04/17/weather/kansas-missouri-iowa-wisconsin-storms-forecast.html" target="_blank" rel="noopener">Midwest Forecast to See Strong Storms on Friday</a>
+            <div class="meta">
+                <span class="section-tag">Home</span>
+                <span>2h ago</span>
+                <span>Judson Jones and Nazaneen Ghaffar</span>
+            </div>
+            <div class="summary-preview">The Midwest has faced day after day of weather warnings this week. More are expected on Friday.</div>
+        </div>
+        </div>
+    </div>
+    <div class="pub-card">
+        <div class="pub-header" style="background:#E3120B;color:#fff">
+            The Economist
+            <span class="count">23 articles</span>
+        </div>
+        <div class="article-list">
+            
+        <div class="article" data-title="The game theory behind violating ceasefires" data-summary="Truces like the one in the Gulf get broken all the time. But they still work" data-pub="The Economist" data-published="2026-04-16T13:45:23+00:00">
+            <a href="https://www.economist.com/international/2026/04/16/the-game-theory-behind-violating-ceasefires" target="_blank" rel="noopener">The game theory behind violating ceasefires</a>
+            <div class="meta">
+                <span class="section-tag">International</span>
+                <span>22h ago</span>
+                
+            </div>
+            <div class="summary-preview">Truces like the one in the Gulf get broken all the time. But they still work</div>
+        </div>
+        <div class="article" data-title="European policymakers fiddle with energy prices, again" data-summary="By subsidising fuel, they are delaying adjustments in demand" data-pub="The Economist" data-published="2026-04-16T13:45:23+00:00">
+            <a href="https://www.economist.com/europe/2026/04/16/european-policymakers-fiddle-with-energy-prices-again" target="_blank" rel="noopener">European policymakers fiddle with energy prices, again</a>
+            <div class="meta">
+                <span class="section-tag">Europe</span>
+                <span>22h ago</span>
+                
+            </div>
+            <div class="summary-preview">By subsidising fuel, they are delaying adjustments in demand</div>
+        </div>
+        <div class="article" data-title="Where should Pablo Picasso’s “Guernica” be allowed to hang?" data-summary="Arguments over the painting’s rightful place hark back to ugly regional politics" data-pub="The Economist" data-published="2026-04-16T13:45:23+00:00">
+            <a href="https://www.economist.com/europe/2026/04/16/where-should-pablo-picassos-guernica-be-allowed-to-hang" target="_blank" rel="noopener">Where should Pablo Picasso’s “Guernica” be allowed to hang?</a>
+            <div class="meta">
+                <span class="section-tag">Europe</span>
+                <span>22h ago</span>
+                
+            </div>
+            <div class="summary-preview">Arguments over the painting’s rightful place hark back to ugly regional politics</div>
+        </div>
+        <div class="article" data-title="A scramble ahead of France’s presidential election" data-summary="A populist-right victory is possible, but not inevitable" data-pub="The Economist" data-published="2026-04-16T13:45:23+00:00">
+            <a href="https://www.economist.com/europe/2026/04/16/a-scramble-ahead-of-frances-presidential-election" target="_blank" rel="noopener">A scramble ahead of France’s presidential election</a>
+            <div class="meta">
+                <span class="section-tag">Europe</span>
+                <span>22h ago</span>
+                
+            </div>
+            <div class="summary-preview">A populist-right victory is possible, but not inevitable</div>
+        </div>
+        <div class="article" data-title="“Complete change of regime” in Hungary" data-summary="Peter Magyar vows to root out corruption" data-pub="The Economist" data-published="2026-04-16T13:45:23+00:00">
+            <a href="https://www.economist.com/europe/2026/04/16/complete-change-of-regime-in-hungary" target="_blank" rel="noopener">“Complete change of regime” in Hungary</a>
+            <div class="meta">
+                <span class="section-tag">Europe</span>
+                <span>22h ago</span>
+                
+            </div>
+            <div class="summary-preview">Peter Magyar vows to root out corruption</div>
+        </div>
+        <div class="article" data-title="Venezuela is not the triumph Donald Trump claims, but it’s improving" data-summary="Economic growth may accelerate and the regime has become less repressive" data-pub="The Economist" data-published="2026-04-16T13:45:23+00:00">
+            <a href="https://www.economist.com/briefing/2026/04/16/venezuela-is-not-the-triumph-donald-trump-claims-but-its-improving" target="_blank" rel="noopener">Venezuela is not the triumph Donald Trump claims, but it’s improving</a>
+            <div class="meta">
+                <span class="section-tag">Briefing</span>
+                <span>22h ago</span>
+                
+            </div>
+            <div class="summary-preview">Economic growth may accelerate and the regime has become less repressive</div>
+        </div>
+        <div class="article" data-title="The impending global food shock is preventable" data-summary="So why won’t it be prevented?" data-pub="The Economist" data-published="2026-04-16T13:45:23+00:00">
+            <a href="https://www.economist.com/leaders/2026/04/16/the-impending-global-food-shock-is-preventable" target="_blank" rel="noopener">The impending global food shock is preventable</a>
+            <div class="meta">
+                <span class="section-tag">Leaders</span>
+                <span>22h ago</span>
+                
+            </div>
+            <div class="summary-preview">So why won’t it be prevented?</div>
+        </div>
+        <div class="article" data-title="Donald Trump has made Venezuela a better place" data-summary="But the American president is misinterpreting an incomplete success" data-pub="The Economist" data-published="2026-04-16T13:45:23+00:00">
+            <a href="https://www.economist.com/leaders/2026/04/16/donald-trump-has-made-venezuela-a-better-place" target="_blank" rel="noopener">Donald Trump has made Venezuela a better place</a>
+            <div class="meta">
+                <span class="section-tag">Leaders</span>
+                <span>22h ago</span>
+                
+            </div>
+            <div class="summary-preview">But the American president is misinterpreting an incomplete success</div>
+        </div>
+        <div class="article" data-title="Peter Magyar’s victory will keep Hungary in the spotlight" data-summary="The country will become a test case for reversing democratic decay" data-pub="The Economist" data-published="2026-04-16T13:45:23+00:00">
+            <a href="https://www.economist.com/leaders/2026/04/16/peter-magyars-victory-will-keep-hungary-in-the-spotlight" target="_blank" rel="noopener">Peter Magyar’s victory will keep Hungary in the spotlight</a>
+            <div class="meta">
+                <span class="section-tag">Leaders</span>
+                <span>22h ago</span>
+                
+            </div>
+            <div class="summary-preview">The country will become a test case for reversing democratic decay</div>
+        </div>
+        <div class="article" data-title="The desperate pursuit of final approval" data-summary="An office parable" data-pub="The Economist" data-published="2026-04-16T13:45:23+00:00">
+            <a href="https://www.economist.com/business/2026/04/16/the-desperate-pursuit-of-final-approval" target="_blank" rel="noopener">The desperate pursuit of final approval</a>
+            <div class="meta">
+                <span class="section-tag">Business</span>
+                <span>22h ago</span>
+                
+            </div>
+            <div class="summary-preview">An office parable</div>
+        </div>
+        <div class="article" data-title="Australia’s startup scene is thriving at last" data-summary="Can the Lucky Country recreate Silicon Valley down under?" data-pub="The Economist" data-published="2026-04-16T13:45:23+00:00">
+            <a href="https://www.economist.com/business/2026/04/16/australias-startup-scene-is-thriving-at-last" target="_blank" rel="noopener">Australia’s startup scene is thriving at last</a>
+            <div class="meta">
+                <span class="section-tag">Business</span>
+                <span>22h ago</span>
+                
+            </div>
+            <div class="summary-preview">Can the Lucky Country recreate Silicon Valley down under?</div>
+        </div>
+        <div class="article" data-title="Could AI’s leading men become as powerful as Ford or Rockefeller?" data-summary="For now, they are still a long way behind" data-pub="The Economist" data-published="2026-04-16T10:33:44+00:00">
+            <a href="https://www.economist.com/business/2026/04/16/could-ais-leading-men-become-as-powerful-as-ford-or-rockefeller" target="_blank" rel="noopener">Could AI’s leading men become as powerful as Ford or Rockefeller?</a>
+            <div class="meta">
+                <span class="section-tag">Business</span>
+                <span>Apr 16, 10:33</span>
+                
+            </div>
+            <div class="summary-preview">For now, they are still a long way behind</div>
+        </div>
+        <div class="article" data-title="Millions will go hungry if the Strait of Hormuz stays closed" data-summary="Expensive fuel and fertiliser will lead to smaller harvests and higher prices" data-pub="The Economist" data-published="2026-04-16T10:19:47+00:00">
+            <a href="https://www.economist.com/international/2026/04/16/millions-will-go-hungry-if-the-strait-of-hormuz-stays-closed" target="_blank" rel="noopener">Millions will go hungry if the Strait of Hormuz stays closed</a>
+            <div class="meta">
+                <span class="section-tag">International</span>
+                <span>Apr 16, 10:19</span>
+                
+            </div>
+            <div class="summary-preview">Expensive fuel and fertiliser will lead to smaller harvests and higher prices</div>
+        </div>
+        <div class="article" data-title="India’s space industry is blasting off" data-summary="Thank Nehru, Modi and Musk" data-pub="The Economist" data-published="2026-04-16T10:18:45+00:00">
+            <a href="https://www.economist.com/business/2026/04/16/indias-space-industry-is-blasting-off" target="_blank" rel="noopener">India’s space industry is blasting off</a>
+            <div class="meta">
+                <span class="section-tag">Business</span>
+                <span>Apr 16, 10:18</span>
+                
+            </div>
+            <div class="summary-preview">Thank Nehru, Modi and Musk</div>
+        </div>
+        <div class="article" data-title="Global imbalances are back. Who’s to blame?" data-summary="The suspects look familiar" data-pub="The Economist" data-published="2026-04-16T09:58:29+00:00">
+            <a href="https://www.economist.com/finance-and-economics/2026/04/16/global-imbalances-are-back-whos-to-blame" target="_blank" rel="noopener">Global imbalances are back. Who’s to blame?</a>
+            <div class="meta">
+                <span class="section-tag">Finance &amp; Economics</span>
+                <span>Apr 16, 09:58</span>
+                
+            </div>
+            <div class="summary-preview">The suspects look familiar</div>
+        </div>
+        </div>
+    </div>
+        </div>
+        <div id="emptyState" class="empty-state" style="display:none;">
+            No articles match the current filter. Click <strong onclick="toggleTimeFilter()">All articles</strong> to see older stories.
+        </div>
+    </div>
+
+    <div class="footer">
+        Generated 12:10 UTC | Personal News Dashboard
+    </div>
+
+    <script>
+    // State
+    let timeFilterActive = true;
+
+    function getCutoff() {
+        return Date.now() - (48 * 60 * 60 * 1000);
+    }
+
+    // Master filter: applies both search and time filter together
+    function applyFilters() {
+        const query = document.getElementById('search').value.toLowerCase().trim();
+        const cutoff = getCutoff();
+        let visibleCount = 0;
+
+        document.querySelectorAll('.article').forEach(el => {
+            let show = true;
+
+            if (timeFilterActive) {
+                const published = el.dataset.published || '';
+                if (published) {
+                    const pubTime = new Date(published).getTime();
+                    if (!isNaN(pubTime) && pubTime < cutoff) show = false;
+                }
+            }
+
+            if (show && query) {
+                const title = (el.dataset.title || '').toLowerCase();
+                const summary = (el.dataset.summary || '').toLowerCase();
+                const pub = (el.dataset.pub || '').toLowerCase();
+                if (!title.includes(query) && !summary.includes(query) && !pub.includes(query)) {
+                    show = false;
+                }
+            }
+
+            el.style.display = show ? '' : 'none';
+            if (show) visibleCount++;
+        });
+
+        // Hide publication cards with zero visible articles, update counts
+        document.querySelectorAll('.pub-card').forEach(card => {
+            const visible = card.querySelectorAll('.article:not([style*="display: none"])');
+            card.style.display = visible.length > 0 ? '' : 'none';
+            const countEl = card.querySelector('.count');
+            if (countEl) countEl.textContent = visible.length + ' articles';
+        });
+
+        // Update total count in header
+        const statsSpans = document.querySelectorAll('.stats span');
+        if (statsSpans.length > 0) statsSpans[0].textContent = visibleCount;
+
+        // Empty state (#26)
+        const emptyEl = document.getElementById('emptyState');
+        if (emptyEl) emptyEl.style.display = visibleCount === 0 ? 'block' : 'none';
+    }
+
+    function toggleTimeFilter() {
+        const btn = document.getElementById('timeToggle');
+        timeFilterActive = !timeFilterActive;
+        btn.classList.toggle('active', timeFilterActive);
+        btn.querySelector('.toggle-label').textContent = timeFilterActive ? 'Last 48h' : 'All articles';
+        applyFilters();
+    }
+
+    document.getElementById('search').addEventListener('input', applyFilters);
+    applyFilters();
+
+    // Keyboard shortcut: "/" focuses search, Escape clears it
+    document.addEventListener('keydown', function(e) {
+        if (e.key === '/' && !['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) {
+            e.preventDefault();
+            document.getElementById('search').focus();
+        } else if (e.key === 'Escape' && document.activeElement.id === 'search') {
+            document.getElementById('search').value = '';
+            applyFilters();
+            document.activeElement.blur();
+        }
+    });
+
+    // Toggle article summary on click
+    document.querySelectorAll('.article').forEach(el => {
+        el.addEventListener('click', function(e) {
+            if (e.target.tagName === 'A') return;
+            this.classList.toggle('expanded');
+        });
+    });
+
+    // Refresh button -- POST to /refresh, poll /status for real completion (#20, #3)
+    function refreshDashboard() {
+        const isLocal = ['localhost', '127.0.0.1', ''].includes(window.location.hostname);
+        if (!isLocal) {
+            alert('This is the static version — it refreshes automatically via GitHub Actions (6am, noon, 6pm UTC).
+
+To trigger a manual refresh, go to:
+github.com/stv008/news-dashboard → Actions → Refresh News Dashboard → Run workflow');
+            return;
+        }
+        const btn = document.getElementById('refreshBtn');
+        btn.classList.add('loading');
+        btn.innerHTML = '<span class="icon">&#x21bb;</span> Refreshing...';
+
+        // Record the generation time before we start
+        let startGenTime = 0;
+        fetch('/status').then(r => r.json()).then(d => { startGenTime = d.last_generated || 0; });
+
+        fetch('/refresh', { method: 'POST' })
+            .then(r => r.json())
+            .then(() => {
+                // Poll /status until last_generated changes (real completion detection)
+                let attempts = 0;
+                const poll = setInterval(() => {
+                    attempts++;
+                    if (attempts > 60) { // 3 min max
+                        clearInterval(poll);
+                        btn.classList.remove('loading');
+                        btn.innerHTML = '<span class="icon">&#x21bb;</span> Refresh';
+                        alert('Refresh is taking longer than expected. Check the terminal.');
+                        return;
+                    }
+                    fetch('/status')
+                        .then(r => r.json())
+                        .then(data => {
+                            if (data.last_generated > startGenTime) {
+                                clearInterval(poll);
+                                location.reload();
+                            }
+                        })
+                        .catch(() => {});
+                }, 3000);
+            })
+            .catch(() => {
+                btn.classList.remove('loading');
+                btn.innerHTML = '<span class="icon">&#x21bb;</span> Refresh';
+                alert('Could not connect. Make sure you are running server.py (python server.py)');
+            });
+    }
+    </script>
+</body>
+</html>
