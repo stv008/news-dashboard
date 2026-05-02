@@ -49,7 +49,7 @@ FEEDS = {
         {"url": "https://www.ft.com/world?format=rss", "section": "World"},
     ],
     "Harvard Business Review": [
-        {"url": "http://feeds.harvardbusiness.org/harvardbusiness", "section": "Latest"},
+        {"url": "https://feeds.feedburner.com/harvardbusiness", "section": "Latest"},
     ],
 }
 
