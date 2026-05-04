@@ -161,9 +161,19 @@ PUB_COLORS = {
 
 # === Fetcher settings ===
 LOOKBACK_HOURS = 48             # How many hours back to look for articles
+
+# Per-publication overrides. Some publications (HBR, weekly newsletters) don't
+# publish often enough for the global 48h window — extend their lookback.
+LOOKBACK_OVERRIDES = {
+    "Harvard Business Review": 168,  # 1 week
+    "Last Week in AI": 240,          # 10 days (weekly newsletter)
+    "MIT Technology Review": 168,    # 1 week
+}
+
 MAX_ARTICLES_PER_PUB = 15       # Maximum articles per publication on dashboard
 FETCH_TIMEOUT_SECONDS = 15      # HTTP request timeout per feed
 FETCH_DELAY_SECONDS = 0.5       # Politeness delay between feed requests
+MAX_FETCH_RETRIES = 3           # Retry transient failures up to N times
 MAX_SUMMARY_LENGTH = 500        # Max chars stored per article summary
 USER_AGENT = (
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
@@ -175,7 +185,7 @@ USER_AGENT = (
 MAX_ARTICLE_AGE_DAYS = 90       # Prune articles older than this
 
 # === Claude API settings (optional) ===
-CLAUDE_MODEL = "claude-sonnet-4-20250514"
+CLAUDE_MODEL = "claude-sonnet-4-6"
 MAX_ARTICLES_TO_SUMMARIZE = 30  # Top N articles to send for AI summary
 MAX_BRIEFING_TOKENS = 1500      # Max output tokens for AI briefing
 
