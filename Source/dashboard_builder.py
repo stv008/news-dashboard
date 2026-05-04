@@ -8,6 +8,9 @@ import sqlite3
 import re
 import html as html_mod
 from datetime import datetime, timezone
+from zoneinfo import ZoneInfo
+
+DISPLAY_TZ = ZoneInfo("Europe/Bucharest")
 from config import DB_PATH, OUTPUT_HTML, MAX_ARTICLES_PER_PUB, LOOKBACK_HOURS, PUB_COLORS
 
 
@@ -607,7 +610,7 @@ def format_time(iso_str):
         elif hours < 24:
             return f"{int(hours)}h ago"
         else:
-            return dt.strftime("%b %d, %H:%M")
+            return dt.astimezone(DISPLAY_TZ).strftime("%b %d, %H:%M")
     except Exception:
         return ""
 
@@ -678,10 +681,10 @@ def build_dashboard(ai_summary=None):
         <div class="summary-text">{sanitize_ai_html(ai_summary)}</div>
     </div>"""
 
-    now = datetime.now(timezone.utc)
+    now = datetime.now(DISPLAY_TZ)
     html_output = TEMPLATE
     html_output = html_output.replace("{{ date }}", now.strftime("%A, %B %d, %Y"))
-    html_output = html_output.replace("{{ updated_at }}", now.strftime("%H:%M UTC"))
+    html_output = html_output.replace("{{ updated_at }}", now.strftime("%H:%M Bucharest"))
     html_output = html_output.replace("{{ total_articles }}", str(len(articles)))
     html_output = html_output.replace("{{ pub_count }}", str(len(pubs)))
     html_output = html_output.replace("{{ publication_cards }}", cards_html)
