@@ -14,7 +14,7 @@ import urllib.error
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timedelta, timezone
 from config import (
-    FEEDS, LOOKBACK_HOURS, DB_PATH, USER_AGENT,
+    FEEDS, LOOKBACK_HOURS, LOOKBACK_OVERRIDES, DB_PATH, USER_AGENT,
     FETCH_TIMEOUT_SECONDS, FETCH_DELAY_SECONDS, MAX_SUMMARY_LENGTH,
     MAX_ARTICLE_AGE_DAYS, MAX_FETCH_RETRIES,
 )
@@ -128,7 +128,8 @@ def fetch_feed(pub_name, feed_info):
             if not feed.entries:
                 print(f"  Warning: Could not parse {pub_name}/{section}: {feed.bozo_exception}")
                 return []
-        cutoff = datetime.now(timezone.utc) - timedelta(hours=LOOKBACK_HOURS)
+        lookback = LOOKBACK_OVERRIDES.get(pub_name, LOOKBACK_HOURS)
+        cutoff = datetime.now(timezone.utc) - timedelta(hours=lookback)
         for entry in feed.entries:
             title = clean_html(entry.get('title', ''))
             if not title:

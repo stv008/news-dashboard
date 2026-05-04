@@ -63,6 +63,13 @@ PUB_COLORS = {
 }
 
 LOOKBACK_HOURS = 48
+
+# Per-publication overrides. HBR doesn't publish on weekends, so the
+# global 48h window drops it every Monday morning.
+LOOKBACK_OVERRIDES = {
+    "Harvard Business Review": 168,  # 1 week
+}
+
 MAX_ARTICLES_PER_PUB = 15
 FETCH_TIMEOUT_SECONDS = 15
 FETCH_DELAY_SECONDS = 0.5

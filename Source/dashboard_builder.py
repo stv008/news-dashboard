@@ -6,12 +6,13 @@ Generates a beautiful HTML dashboard from stored articles.
 import os
 import sqlite3
 import re
+import json
 import html as html_mod
 from datetime import datetime, timezone
 from zoneinfo import ZoneInfo
 
 DISPLAY_TZ = ZoneInfo("Europe/Bucharest")
-from config import DB_PATH, OUTPUT_HTML, MAX_ARTICLES_PER_PUB, LOOKBACK_HOURS, PUB_COLORS
+from config import DB_PATH, OUTPUT_HTML, MAX_ARTICLES_PER_PUB, LOOKBACK_HOURS, LOOKBACK_OVERRIDES, PUB_COLORS
 
 
 def esc(text):
@@ -421,14 +422,17 @@ TEMPLATE = """<!DOCTYPE html>
     // State
     let timeFilterActive = true;
 
-    function getCutoff() {
-        return Date.now() - ({{ lookback_hours }} * 60 * 60 * 1000);
+    const LOOKBACK_DEFAULT = {{ lookback_hours }};
+    const LOOKBACK_OVERRIDES = {{ lookback_overrides_json }};
+
+    function getCutoffFor(pub) {
+        const hours = LOOKBACK_OVERRIDES[pub] || LOOKBACK_DEFAULT;
+        return Date.now() - (hours * 60 * 60 * 1000);
     }
 
     // Master filter: applies both search and time filter together
     function applyFilters() {
         const query = document.getElementById('search').value.toLowerCase().trim();
-        const cutoff = getCutoff();
         let visibleCount = 0;
 
         document.querySelectorAll('.article').forEach(el => {
@@ -438,6 +442,7 @@ TEMPLATE = """<!DOCTYPE html>
                 const published = el.dataset.published || '';
                 if (published) {
                     const pubTime = new Date(published).getTime();
+                    const cutoff = getCutoffFor(el.dataset.pub || '');
                     if (!isNaN(pubTime) && pubTime < cutoff) show = false;
                 }
             }
@@ -690,6 +695,7 @@ def build_dashboard(ai_summary=None):
     html_output = html_output.replace("{{ publication_cards }}", cards_html)
     html_output = html_output.replace("{{ ai_summary_section }}", ai_html)
     html_output = html_output.replace("{{ lookback_hours }}", str(LOOKBACK_HOURS))
+    html_output = html_output.replace("{{ lookback_overrides_json }}", json.dumps(LOOKBACK_OVERRIDES))
 
     os.makedirs(os.path.dirname(OUTPUT_HTML), exist_ok=True)
     with open(OUTPUT_HTML, "w", encoding="utf-8") as f:
