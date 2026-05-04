@@ -512,15 +512,26 @@ TEMPLATE = """<!DOCTYPE html>
             fetch(WORKER_URL, { method: 'POST' })
                 .then(r => r.json())
                 .then(data => {
-                    if (data.status === 'started') {
-                        btn.innerHTML = '<span class="icon">&#x21bb;</span> Triggered ✓';
-                        setTimeout(() => {
-                            btn.classList.remove('loading');
-                            btn.innerHTML = '<span class="icon">&#x21bb;</span> Refresh';
-                        }, 4000);
-                    } else {
+                    if (data.status !== 'started') {
                         throw new Error(data.error || 'Unknown error');
                     }
+                    // Workflow takes ~40s to fetch + build + deploy, plus a few
+                    // seconds for the GitHub Pages CDN to invalidate. Count down,
+                    // then hard-reload bypassing the browser cache.
+                    let secondsLeft = 75;
+                    btn.innerHTML = '<span class="icon">&#x21bb;</span> Building... ' + secondsLeft + 's';
+                    const tick = setInterval(() => {
+                        secondsLeft -= 1;
+                        if (secondsLeft <= 0) {
+                            clearInterval(tick);
+                            btn.innerHTML = '<span class="icon">&#x21bb;</span> Reloading...';
+                            // Cache-bust the URL so we don't hit the local browser cache
+                            const sep = window.location.search ? '&' : '?';
+                            window.location.href = window.location.pathname + window.location.search + sep + '_=' + Date.now();
+                        } else {
+                            btn.innerHTML = '<span class="icon">&#x21bb;</span> Building... ' + secondsLeft + 's';
+                        }
+                    }, 1000);
                 })
                 .catch(err => {
                     btn.classList.remove('loading');
