@@ -2,7 +2,7 @@ name: Refresh News Dashboard
 
 on:
   schedule:
-    - cron: '0 4,12,18 * * *'  # 6am, noon, 6pm UTC daily
+    - cron: '0 4,12,18 * * *'  # 4am, noon, 6pm UTC = 7am, 3pm, 9pm Bucharest (summer)
   workflow_dispatch:             # allow manual trigger from GitHub UI
 
 permissions:
