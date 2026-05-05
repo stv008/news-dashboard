@@ -12,7 +12,10 @@ from datetime import datetime, timezone
 from zoneinfo import ZoneInfo
 
 DISPLAY_TZ = ZoneInfo("Europe/Bucharest")
-from config import DB_PATH, OUTPUT_HTML, MAX_ARTICLES_PER_PUB, LOOKBACK_HOURS, LOOKBACK_OVERRIDES, PUB_COLORS
+from config import (
+    DB_PATH, OUTPUT_HTML, MAX_ARTICLES_PER_PUB, LOOKBACK_HOURS, LOOKBACK_OVERRIDES,
+    PUB_COLORS, PUB_TIERS, TIER_ORDER, TIER_LABELS,
+)
 
 
 def esc(text):
@@ -168,6 +171,57 @@ TEMPLATE = """<!DOCTYPE html>
             background: #48bb78;
             box-shadow: 0 0 6px rgba(72, 187, 120, 0.4);
         }
+
+        /* Tier filter pills */
+        .tier-row {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 14px;
+        }
+        .tier-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 7px 14px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            color: var(--text-muted);
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s;
+            white-space: nowrap;
+        }
+        .tier-pill:hover { border-color: var(--accent); color: var(--text); }
+        .tier-pill .tier-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: currentColor;
+            opacity: 0.55;
+        }
+        .tier-pill .tier-count {
+            font-size: 10px;
+            font-weight: 400;
+            opacity: 0.7;
+        }
+        .tier-pill.active {
+            color: var(--text);
+            border-color: var(--accent);
+            background: rgba(108, 122, 255, 0.08);
+        }
+        .tier-pill.active .tier-dot { opacity: 1; }
+        .tier-pill[data-tier="all"] { font-weight: 600; }
+        .tier-pill[data-tier="all"] .tier-dot { display: none; }
+        .tier-pill[data-tier="macro"]      { --tier-color: #6c7aff; color: var(--tier-color); }
+        .tier-pill[data-tier="frontier"]   { --tier-color: #4ade80; color: var(--tier-color); }
+        .tier-pill[data-tier="analysis"]   { --tier-color: #c084fc; color: var(--tier-color); }
+        .tier-pill[data-tier="techpress"]  { --tier-color: #fb923c; color: var(--tier-color); }
+        .tier-pill[data-tier="eu_ro"]      { --tier-color: #fbbf24; color: var(--tier-color); }
+        .tier-pill[data-tier="aggregators"]{ --tier-color: #f87171; color: var(--tier-color); }
+        .tier-pill:not(.active) { color: var(--text-muted); }
 
         /* AI Summary section */
         .ai-summary {
@@ -401,6 +455,9 @@ TEMPLATE = """<!DOCTYPE html>
                 <span class="toggle-label">Last {{ lookback_hours }}h</span>
             </button>
         </div>
+        <div class="tier-row" id="tierRow">
+            {{ tier_pills }}
+        </div>
     </div>
 
     {{ ai_summary_section }}
@@ -424,6 +481,10 @@ TEMPLATE = """<!DOCTYPE html>
 
     const LOOKBACK_DEFAULT = {{ lookback_hours }};
     const LOOKBACK_OVERRIDES = {{ lookback_overrides_json }};
+
+    // Tier filter state — start with all tiers active
+    const ALL_TIERS = {{ all_tiers_json }};
+    let activeTiers = new Set(ALL_TIERS);
 
     function getCutoffFor(pub) {
         const hours = LOOKBACK_OVERRIDES[pub] || LOOKBACK_DEFAULT;
@@ -460,13 +521,23 @@ TEMPLATE = """<!DOCTYPE html>
             if (show) visibleCount++;
         });
 
-        // Hide publication cards with zero visible articles, update counts
+        // Hide publication cards if their tier is filtered out OR they have zero visible articles
         document.querySelectorAll('.pub-card').forEach(card => {
+            const tier = card.dataset.tier || 'other';
             const visible = card.querySelectorAll('.article:not([style*="display: none"])');
-            card.style.display = visible.length > 0 ? '' : 'none';
+            const tierVisible = activeTiers.has(tier);
+            card.style.display = (tierVisible && visible.length > 0) ? '' : 'none';
             const countEl = card.querySelector('.count');
             if (countEl) countEl.textContent = visible.length + ' articles';
         });
+
+        // Recompute visibleCount AFTER tier filter so header stat is accurate
+        let actualVisible = 0;
+        document.querySelectorAll('.pub-card').forEach(card => {
+            if (card.style.display === 'none') return;
+            actualVisible += card.querySelectorAll('.article:not([style*="display: none"])').length;
+        });
+        visibleCount = actualVisible;
 
         // Update total count in header
         const statsSpans = document.querySelectorAll('.stats span');
@@ -484,6 +555,36 @@ TEMPLATE = """<!DOCTYPE html>
         btn.querySelector('.toggle-label').textContent = timeFilterActive ? 'Last {{ lookback_hours }}h' : 'All articles';
         applyFilters();
     }
+
+    function toggleTier(tier) {
+        if (tier === 'all') {
+            // Reset to all tiers active
+            activeTiers = new Set(ALL_TIERS);
+        } else {
+            if (activeTiers.has(tier)) {
+                activeTiers.delete(tier);
+            } else {
+                activeTiers.add(tier);
+            }
+            // If user toggled everything off, reset to all (avoid empty dashboard)
+            if (activeTiers.size === 0) activeTiers = new Set(ALL_TIERS);
+        }
+        // Update pill visual state
+        const allActive = activeTiers.size === ALL_TIERS.length;
+        document.querySelectorAll('.tier-pill').forEach(pill => {
+            const t = pill.dataset.tier;
+            if (t === 'all') {
+                pill.classList.toggle('active', allActive);
+            } else {
+                pill.classList.toggle('active', activeTiers.has(t));
+            }
+        });
+        applyFilters();
+    }
+
+    document.querySelectorAll('.tier-pill').forEach(pill => {
+        pill.addEventListener('click', () => toggleTier(pill.dataset.tier));
+    });
 
     document.getElementById('search').addEventListener('input', applyFilters);
     applyFilters();
@@ -623,6 +724,7 @@ def format_time(iso_str):
 def build_publication_card(pub_name, articles):
     """Build HTML for a single publication card."""
     colors = PUB_COLORS.get(pub_name, {"bg": "#555", "text": "#fff"})
+    tier = PUB_TIERS.get(pub_name, "other")
 
     articles_html = ""
     for a in articles[:MAX_ARTICLES_PER_PUB]:
@@ -647,7 +749,7 @@ def build_publication_card(pub_name, articles):
         </div>"""
 
     return f"""
-    <div class="pub-card">
+    <div class="pub-card" data-tier="{esc(tier)}">
         <div class="pub-header" style="background:{colors['bg']};color:{colors['text']}">
             {pub_name}
             <span class="count">{len(articles)} articles</span>
@@ -656,6 +758,34 @@ def build_publication_card(pub_name, articles):
             {articles_html}
         </div>
     </div>"""
+
+
+def build_tier_pills(pubs):
+    """Render the tier filter pills. Counts reflect publications with articles in this run."""
+    tier_counts = {t: 0 for t in TIER_ORDER}
+    for pub_name in pubs.keys():
+        tier = PUB_TIERS.get(pub_name, "other")
+        if tier in tier_counts:
+            tier_counts[tier] += 1
+
+    total = sum(tier_counts.values())
+    pills_html = (
+        f'<button class="tier-pill active" data-tier="all">'
+        f'All <span class="tier-count">{total}</span>'
+        f'</button>'
+    )
+    for tier in TIER_ORDER:
+        count = tier_counts[tier]
+        if count == 0:
+            continue
+        label = TIER_LABELS.get(tier, tier)
+        pills_html += (
+            f'<button class="tier-pill active" data-tier="{esc(tier)}">'
+            f'<span class="tier-dot"></span>{esc(label)}'
+            f'<span class="tier-count">{count}</span>'
+            f'</button>'
+        )
+    return pills_html
 
 
 def build_dashboard(ai_summary=None):
@@ -696,6 +826,8 @@ def build_dashboard(ai_summary=None):
     html_output = html_output.replace("{{ ai_summary_section }}", ai_html)
     html_output = html_output.replace("{{ lookback_hours }}", str(LOOKBACK_HOURS))
     html_output = html_output.replace("{{ lookback_overrides_json }}", json.dumps(LOOKBACK_OVERRIDES))
+    html_output = html_output.replace("{{ tier_pills }}", build_tier_pills(pubs))
+    html_output = html_output.replace("{{ all_tiers_json }}", json.dumps(TIER_ORDER + ["other"]))
 
     os.makedirs(os.path.dirname(OUTPUT_HTML), exist_ok=True)
     with open(OUTPUT_HTML, "w", encoding="utf-8") as f:

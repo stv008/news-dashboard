@@ -308,6 +308,56 @@ PUB_COLORS = {
     "profit.ro": {"bg": "#0E6E2A", "text": "#fff"},
 }
 
+# === Tier classification (used for dashboard filter pills) ===
+# Maps publication name → tier slug. Publications not listed default to "other".
+PUB_TIERS = {
+    # Macro & Business (the original 6)
+    "Financial Times": "macro", "Bloomberg": "macro", "Wall Street Journal": "macro",
+    "New York Times": "macro", "The Economist": "macro", "Harvard Business Review": "macro",
+    # Tech Press (AI-focused or AI-section feeds)
+    "The Verge — AI": "techpress", "TechCrunch — AI": "techpress",
+    "Wired — AI": "techpress", "Ars Technica — AI": "techpress",
+    "MIT Technology Review": "techpress", "IEEE Spectrum — AI": "techpress",
+    "VentureBeat — AI": "techpress", "The Decoder": "techpress",
+    "CNBC — Technology": "techpress", "The Register": "techpress",
+    "Axios — Technology": "techpress", "Rest of World": "techpress",
+    # Aggregators (community / meta-curation)
+    "Hacker News": "aggregators", "Techmeme": "aggregators",
+    "r/MachineLearning": "aggregators", "r/LocalLLaMA": "aggregators",
+    "r/singularity": "aggregators", "Last Week in AI": "aggregators",
+    # Frontier Labs (primary research / official lab blogs)
+    "OpenAI": "frontier", "Google DeepMind": "frontier", "Google Research": "frontier",
+    "Hugging Face": "frontier", "NVIDIA Developer": "frontier", "NVIDIA Research": "frontier",
+    "Apple ML Research": "frontier", "Allen AI (Ai2)": "frontier",
+    "MIT CSAIL": "frontier", "MIT News — AI": "frontier",
+    "Berkeley AI Research": "frontier", "Replicate": "frontier",
+    "LangChain Changelog": "frontier",
+    # Analysis & Strategy (synthesis voices)
+    "Stratechery": "analysis", "Import AI": "analysis",
+    "One Useful Thing (Mollick)": "analysis", "Latent Space": "analysis",
+    "Marginal Revolution": "analysis", "Astral Codex Ten": "analysis",
+    "LessWrong": "analysis", "AI Snake Oil": "analysis",
+    "The Gradient": "analysis", "Gary Marcus": "analysis",
+    "Interconnects (Lambert)": "analysis", "The Algorithmic Bridge": "analysis",
+    "Eric Topol — Ground Truths": "analysis", "Benedict Evans": "analysis",
+    # EU & Romania (policy + mobility + local)
+    "Politico Europe": "eu_ro", "EU AI Act Tracker": "eu_ro",
+    "CSET (Georgetown)": "eu_ro", "Electrek": "eu_ro",
+    "start-up.ro": "eu_ro", "profit.ro": "eu_ro",
+}
+
+# Display order and human labels for the tier filter pills.
+TIER_ORDER = ["macro", "frontier", "analysis", "techpress", "eu_ro", "aggregators"]
+TIER_LABELS = {
+    "macro": "Macro & Business",
+    "frontier": "Frontier Labs",
+    "analysis": "Analysis",
+    "techpress": "Tech Press",
+    "eu_ro": "EU & Romania",
+    "aggregators": "Aggregators",
+    "other": "Other",
+}
+
 # === Fetcher settings ===
 LOOKBACK_HOURS = 48             # How many hours back to look for articles
 
