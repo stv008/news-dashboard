@@ -129,6 +129,57 @@
             box-shadow: 0 0 6px rgba(72, 187, 120, 0.4);
         }
 
+        /* Tier filter pills */
+        .tier-row {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 14px;
+        }
+        .tier-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 7px 14px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            color: var(--text-muted);
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s;
+            white-space: nowrap;
+        }
+        .tier-pill:hover { border-color: var(--accent); color: var(--text); }
+        .tier-pill .tier-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: currentColor;
+            opacity: 0.55;
+        }
+        .tier-pill .tier-count {
+            font-size: 10px;
+            font-weight: 400;
+            opacity: 0.7;
+        }
+        .tier-pill.active {
+            color: var(--text);
+            border-color: var(--accent);
+            background: rgba(108, 122, 255, 0.08);
+        }
+        .tier-pill.active .tier-dot { opacity: 1; }
+        .tier-pill[data-tier="all"] { font-weight: 600; }
+        .tier-pill[data-tier="all"] .tier-dot { display: none; }
+        .tier-pill[data-tier="macro"]      { --tier-color: #6c7aff; color: var(--tier-color); }
+        .tier-pill[data-tier="frontier"]   { --tier-color: #4ade80; color: var(--tier-color); }
+        .tier-pill[data-tier="analysis"]   { --tier-color: #c084fc; color: var(--tier-color); }
+        .tier-pill[data-tier="techpress"]  { --tier-color: #fb923c; color: var(--tier-color); }
+        .tier-pill[data-tier="eu_ro"]      { --tier-color: #fbbf24; color: var(--tier-color); }
+        .tier-pill[data-tier="aggregators"]{ --tier-color: #f87171; color: var(--tier-color); }
+        .tier-pill:not(.active) { color: var(--text-muted); }
+
         /* AI Summary section */
         .ai-summary {
             margin: 24px 40px;
@@ -340,11 +391,11 @@
     <div class="header">
         <div>
             <h1>Daily News Dashboard</h1>
-            <div class="date">Tuesday, May 05, 2026 | Last updated: 08:23 Bucharest</div>
+            <div class="date">Tuesday, May 05, 2026 | Last updated: 08:32 Bucharest</div>
         </div>
         <div class="right-section">
             <div class="stats">
-                <div><span>792</span> articles</div>
+                <div><span>793</span> articles</div>
                 <div><span>40</span> publications</div>
             </div>
             <button class="refresh-btn" id="refreshBtn" onclick="refreshDashboard()">
@@ -361,19 +412,22 @@
                 <span class="toggle-label">Last 48h</span>
             </button>
         </div>
+        <div class="tier-row" id="tierRow">
+            <button class="tier-pill active" data-tier="all">All <span class="tier-count">40</span></button><button class="tier-pill active" data-tier="macro"><span class="tier-dot"></span>Macro &amp; Business<span class="tier-count">6</span></button><button class="tier-pill active" data-tier="frontier"><span class="tier-dot"></span>Frontier Labs<span class="tier-count">6</span></button><button class="tier-pill active" data-tier="analysis"><span class="tier-dot"></span>Analysis<span class="tier-count">7</span></button><button class="tier-pill active" data-tier="techpress"><span class="tier-dot"></span>Tech Press<span class="tier-count">11</span></button><button class="tier-pill active" data-tier="eu_ro"><span class="tier-dot"></span>EU &amp; Romania<span class="tier-count">4</span></button><button class="tier-pill active" data-tier="aggregators"><span class="tier-dot"></span>Aggregators<span class="tier-count">6</span></button>
+        </div>
     </div>
 
     
     <div class="ai-summary">
         <h2>AI Daily Briefing</h2>
-        <div class="summary-text"><p class="lead">The Iran-Hormuz shipping crisis is driving fuel price pressure upward at the same moment Australia's central bank signals a global rate-tightening outlier case — both hit your €200M debt structure and fleet fuel cost base simultaneously.</p>
+        <div class="summary-text"><p class="lead">The Iran-driven Hormuz closure is tightening fuel supply and lifting oil prices toward critical economic thresholds — a direct cost and residual-value shock for your fleet and debt structure — while Anthropic's pivot to full-service enterprise AI deployment reframes the competitive landscape for your internal AI transformation.</p>
 
 <div class="briefing-item" data-priority="1">
   <span class="priority-badge">1</span>
   <div class="briefing-content">
     <div class="briefing-label">FUEL / MACRO</div>
-    <div class="briefing-headline">Hormuz closure clusters hundreds of vessels near Dubai; oil price trajectory turns sharply upward</div>
-    <div class="briefing-detail">Bloomberg and NYT report hundreds of ships repositioning away from the Strait of Hormuz as Iran widens area of control, while profit.ro's energy segment explicitly warns Romanian executives that oil is approaching "critical thresholds" with cascading inflation and consumption effects. For a CEE fleet operator with fuel as a top variable cost and fuel-indexed lease contracts under pressure, a sustained oil spike reshapes your P&amp;L on both the fleet management and rental sides; review fuel surcharge clauses in operational leasing contracts today. The Romania-specific energy commentary from Profit Point CEO Alexandru Chirilă — "nu vin vremuri ușoare" — is a direct signal to tighten budget buffers now.</div>
+    <div class="briefing-headline">Hormuz closure clusters hundreds of vessels near Dubai; oil approaches critical economic thresholds</div>
+    <div class="briefing-detail">Bloomberg reports hundreds of ships clustering near Dubai as the Strait of Hormuz remains effectively closed, with Iran widening its area of control; the New York Times confirms U.S. warships are actively shooting down Iranian missiles and drones in the Gulf. The Financial Times reports Australia's central bank cited "higher fuel prices as a result of the Iran war" in its third consecutive rate hike, establishing a direct causal link now being priced globally. Profit.ro's Alexandru Chirilă is explicit: oil is approaching thresholds critical for inflation and consumption — your fuel cost line, fleet TCO assumptions, and the variable-rate exposure on your €200M debt structure all face simultaneous pressure; review your fuel surcharge pass-through provisions and rate hedge positions today.</div>
   </div>
 </div>
 
@@ -381,26 +435,26 @@
   <span class="priority-badge">2</span>
   <div class="briefing-content">
     <div class="briefing-label">RATES</div>
-    <div class="briefing-headline">Australia's RBA raises rates for a third consecutive meeting on fuel-driven inflation — a template the ECB cannot fully ignore</div>
-    <div class="briefing-detail">The Wall Street Journal and Financial Times both confirm the Reserve Bank of Australia's third straight hike, explicitly citing fuel-price scenarios as "more than expected" upside risk to inflation. While the ECB is not the RBA, this bucking of the global easing trend — driven by the same energy shock now hitting Europe — raises the tail risk that ECB cuts are delayed or reversed, directly pressuring your €200M floating-rate debt structure. Cross-reference with BNR's next rate decision calendar; any ECB pause reprices your hedging assumptions and covenant headroom.</div>
+    <div class="briefing-headline">Australia's RBA delivers third consecutive hike citing Iran-driven fuel inflation — ECB and BNR repricing risk rises</div>
+    <div class="briefing-detail">The Wall Street Journal and Financial Times both confirm the RBA raised rates a third time, explicitly flagging fuel-price escalation from the Iran conflict as the trigger and warning of "plausible" upside scenarios. This is not an isolated Pacific event: the same fuel-inflation logic now applies to ECB deliberations and will feed directly into BNR's reaction function given Romania's energy import exposure. With €200M in debt, a hawkish ECB pivot or BNR rate hold reversal materially affects your interest cost run-rate; model the scenario where ECB holds higher for longer through Q3 2026 and stress-test your covenant headroom accordingly.</div>
   </div>
 </div>
 
 <div class="briefing-item" data-priority="3">
   <span class="priority-badge">3</span>
   <div class="briefing-content">
-    <div class="briefing-label">AI GOV</div>
-    <div class="briefing-headline">Anthropic launches enterprise AI services company backed by Blackstone, Goldman and H&amp;F — and OpenAI raises $4B for a parallel "Deployment Company"</div>
-    <div class="briefing-detail">Anthropic (covered by The Decoder and Hacker News) is forming a dedicated AI services vehicle with Blackstone, Hellman &amp; Friedman and Goldman Sachs to drive Claude adoption in mid-market enterprises; OpenAI simultaneously raises over $4B for its own enterprise deployment joint venture. Both moves signal that the frontier labs are now competing on implementation and integration — not just model capability — which has a direct read-across to your 19-department Azure Lakehouse and MCP server rollout: enterprise-grade deployment tooling, compliance packaging, and ISO 42001-aligned governance are becoming commoditized services, potentially accelerating your internal transformation timeline and offering validated vendor options. Evaluate whether your current Azure-first stack should incorporate Claude API as a secondary model layer, particularly for CFO-function automation given the concurrent OpenAI-PwC CFO partnership announcement.</div>
+    <div class="briefing-label">ROMANIA</div>
+    <div class="briefing-headline">Cernavodă Unit 2 automatic disconnection tightens Romania's energy balance at a moment of rising fuel costs</div>
+    <div class="briefing-detail">Profit.ro reports Cernavodă Unit 2 disconnected automatically Monday evening following an electrical separator fault in the classical section of the plant. Nuclear provides approximately 20% of Romania's electricity baseload; an extended outage at this moment — with global fuel prices rising — will push domestic power prices higher and amplify the inflation signal BNR is already monitoring. For your operations, this affects energy costs across your branch network and EV charging infrastructure economics; track Nuclearelectrica's timeline for reconnection closely.</div>
   </div>
 </div>
 
 <div class="briefing-item" data-priority="4">
   <span class="priority-badge">4</span>
   <div class="briefing-content">
-    <div class="briefing-label">ROMANIA</div>
-    <div class="briefing-headline">Romania's new government enters a credibility stress test in its first month — fiscal and regulatory clarity remains weeks away</div>
-    <div class="briefing-detail">Profit.ro's analysis describes the incoming Romanian government as heading directly into a "stress test" on credibility, optimism, and professionalism, with formation expected by late May or early June at the latest. For a company with operational leasing contracts, insurance brokerage licensing, and fleet management regulated at national level, policy continuity on VAT treatment of leasing, EV incentive schemes, and BNR coordination is at risk during this transition window. Lock in any pending regulatory submissions or contract renewals before the new government's first budget revision cycle begins.</div>
+    <div class="briefing-label">AI GOV</div>
+    <div class="briefing-headline">Anthropic launches full enterprise AI services company backed by Blackstone and Goldman — the deployment model for Claude just changed</div>
+    <div class="briefing-detail">Anthropic, Blackstone, Hellman & Friedman, and Goldman Sachs are launching a dedicated AI services company targeting mid-market business adoption of Claude, as reported by The Decoder and confirmed via Anthropic's own announcement on Hacker News. Simultaneously, OpenAI has raised over $4 billion for "The Deployment Company," a parallel enterprise deployment venture (The Decoder). Both moves signal that the frontier model providers are now competing to own the implementation layer — precisely the layer your 19-department AI transformation sits on. For your Azure Lakehouse and MCP server architecture, this changes the vendor negotiation dynamic: Microsoft, Anthropic, and OpenAI are now each offering end-to-end deployment, and your ISO 42001 governance framework must account for the contractual and data-residency implications of third-party AI services companies touching your classified data under your AUP.</div>
   </div>
 </div>
 
@@ -408,8 +462,8 @@
   <span class="priority-badge">5</span>
   <div class="briefing-content">
     <div class="briefing-label">EV / FLEET</div>
-    <div class="briefing-headline">Kia EV sales surge on full model lineup — residual value pressure on non-Kia EVs in your remarketing portfolio intensifies</div>
-    <div class="briefing-detail">Electrek reports Kia is emerging as a "dark horse" in the EV market with strong volume growth across a full sedan-to-van range. As Kia EV supply increases and pricing becomes more competitive, residual values on older or less-competitive EV models in your remarketing pipeline face accelerated depreciation — a direct hit to the residual value guarantees embedded in your operational leasing book. Cross-reference with your current EV mix in the fleet and the 24-36 month return cycle; adjust residual value assumptions in pricing models for any new EV leases signed this quarter.</div>
+    <div class="briefing-headline">Kia EV sales surge with full model lineup — competitive pressure on your remarketing residual assumptions intensifies</div>
+    <div class="briefing-detail">Electrek reports Kia has become a significant EV market force with a full lineup spanning sedans to vans, with sales surging on new model launches. For your fleet remarketing operation, accelerating EV supply from volume brands like Kia compresses used-EV residual values faster than the curves built into your current leasing contracts. The Economist's parallel story on global carmakers pursuing Chinese partnerships to cut costs adds a supply-side dimension: more affordable EVs entering the CEE market in 2026-2027 will front-run your residual value models. Revisit your EV residual value stress scenarios in the next quarterly fleet review.</div>
   </div>
 </div>
 
@@ -417,19 +471,19 @@
   <span class="priority-badge">6</span>
   <div class="briefing-content">
     <div class="briefing-label">FRONTIER AI</div>
-    <div class="briefing-headline">Microsoft retires 17 legacy Azure VM families — infrastructure debt on older instance types becomes a near-term forced migration</div>
-    <div class="briefing-detail">The Register reports Microsoft will stop accepting reservations on 17 Azure VM flavors — mostly Haswell, Skylake, and Cascade Lake — with full retirement by 2028. If your Azure Lakehouse buildout or MCP server infrastructure is running on any of these instance types (common in early Azure deployments), you face a forced migration window; 2028 sounds distant but reservation cutoffs arrive first and disrupt cost planning. Assign your Azure architecture lead to audit current VM families against the retirement list this week before the next infrastructure budget cycle closes.</div>
+    <div class="briefing-headline">OpenAI fast-tracking AI agent hardware phone for H1 2027 — on-device AI agents become a near-term enterprise reality</div>
+    <div class="briefing-detail">Techmeme citing analyst Ming-Chi Kuo reports OpenAI is accelerating an AI agent phone with dual NPUs and a custom MediaTek Dimensity 9600 SoC targeting mass production by H1 2027. This is directly relevant to your MCP server architecture planning: if on-device AI agents with dedicated neural processing arrive in enterprise hands within 18 months, your MCP integration points — particularly for field staff in fleet management and remarketing — need to be designed for agent-to-agent interaction, not just human-to-model. Factor this into your Azure Lakehouse architecture roadmap now rather than retrofitting in 2027.</div>
   </div>
 </div>
 
 <div class="briefing-action">
   <div class="briefing-label">WATCH TODAY</div>
   <ul>
-    <li>Pull fuel surcharge and energy indexation clauses from your top 20 operational leasing contracts — verify exposure if Brent sustains above current levels through Q3.</li>
-    <li>Instruct treasury to model two ECB scenarios: one additional cut delayed by 6 months versus a hold-through-2026 case — quantify impact on €200M debt service under each.</li>
-    <li>Direct Azure architecture lead to cross-reference active VM instance types against Microsoft's retirement list published by The Register; flag any Lakehouse or MCP nodes at risk.</li>
-    <li>Review EV residual value assumptions in your dynamic pricing engine for any leases with 2026-2027 return dates — Kia volume growth is a leading indicator of broader EV residual compression in CEE used-car markets.</li>
-    <li>Monitor Romanian government formation timeline via profit.ro; schedule a regulatory affairs review before the first cabinet is confirmed to pre-position on leasing VAT and EV subsidy continuity.</li>
+    <li>Pull your fuel surcharge contract clauses across the top 20 operational leasing clients — verify pass-through rights are active and quantify the uncovered exposure if Brent holds above the critical threshold Chirilă flagged on Profit.ro.</li>
+    <li>Instruct treasury to model three ECB rate scenarios through Q4 2026 (hold, +25bp, +50bp) against your current €200M debt structure and report covenant headroom by end of week.</li>
+    <li>Track Nuclearelectrica's Cernavodă Unit 2 reconnection timeline — if outage extends beyond 72 hours, escalate to your energy procurement review for branch network and any EV charging commitments.</li>
+    <li>Brief your Chief AI Officer or transformation lead on the Anthropic enterprise services company and OpenAI Deployment Company launches — request a written assessment of how these entities interact with your existing Azure and data classification (AUP) governance before any new vendor conversations are opened.</li>
+    <li>Schedule a residual value model review for EV fleet categories with your remarketing team — use Kia's volume surge and the Chinese OEM cost-reduction trend as the stress inputs.</li>
   </ul>
 </div></div>
     </div>
@@ -437,36 +491,45 @@
     <div class="main">
         <div class="pub-grid" id="pubGrid">
             
-    <div class="pub-card">
+    <div class="pub-card" data-tier="macro">
         <div class="pub-header" style="background:#FCD0A1;color:#33302E">
             Financial Times
-            <span class="count">59 articles</span>
+            <span class="count">60 articles</span>
         </div>
         <div class="article-list">
             
+        <div class="article" data-title="Great expectations (for earnings)" data-summary="Stocks look cheaper — if everything goes perfectly" data-pub="Financial Times" data-published="2026-05-05T05:30:01+00:00">
+            <a href="https://www.ft.com/content/83eadcbf-41f4-4feb-a7ee-c8a2a7adea8f" target="_blank" rel="noopener">Great expectations (for earnings)</a>
+            <div class="meta">
+                <span class="section-tag">Companies</span>
+                <span>2m ago</span>
+                
+            </div>
+            <div class="summary-preview">Stocks look cheaper — if everything goes perfectly</div>
+        </div>
         <div class="article" data-title="HSBC profits hit by fraud-related credit losses" data-summary="First-quarter income falls $100mn to $9.4bn, missing analysts’ expectations" data-pub="Financial Times" data-published="2026-05-05T05:14:55+00:00">
             <a href="https://www.ft.com/content/520cd091-d59e-4072-b4b2-879e2eb7b7a8" target="_blank" rel="noopener">HSBC profits hit by fraud-related credit losses</a>
             <div class="meta">
                 <span class="section-tag">Companies</span>
-                <span>8m ago</span>
+                <span>17m ago</span>
                 
             </div>
             <div class="summary-preview">First-quarter income falls $100mn to $9.4bn, missing analysts’ expectations</div>
         </div>
-        <div class="article" data-title="Australia raises rates under pressure from inflation and Iran war" data-summary="Central bank bucks global trend with third increase this year" data-pub="Financial Times" data-published="2026-05-05T05:02:29+00:00">
-            <a href="https://www.ft.com/content/be456f7f-ec53-4a9c-9cdd-59a0904579fc" target="_blank" rel="noopener">Australia raises rates under pressure from inflation and Iran war</a>
+        <div class="article" data-title="Australia bucks trend and raises rates under inflation pressure" data-summary="Central bank cites higher fuel prices as result of Iran war as it unveils third increase this year" data-pub="Financial Times" data-published="2026-05-05T05:02:29+00:00">
+            <a href="https://www.ft.com/content/be456f7f-ec53-4a9c-9cdd-59a0904579fc" target="_blank" rel="noopener">Australia bucks trend and raises rates under inflation pressure</a>
             <div class="meta">
                 <span class="section-tag">World</span>
-                <span>20m ago</span>
+                <span>30m ago</span>
                 
             </div>
-            <div class="summary-preview">Central bank bucks global trend with third increase this year</div>
+            <div class="summary-preview">Central bank cites higher fuel prices as result of Iran war as it unveils third increase this year</div>
         </div>
         <div class="article" data-title="Trump’s threats give EU pause for thought ahead of US trade deal vote" data-summary="Also in this newsletter: Compromise in Italo-Swiss fight over Alpine fire tragedy costs" data-pub="Financial Times" data-published="2026-05-05T05:00:02+00:00">
             <a href="https://www.ft.com/content/80285a2f-e765-49fe-9f18-a6304acb723e" target="_blank" rel="noopener">Trump’s threats give EU pause for thought ahead of US trade deal vote</a>
             <div class="meta">
                 <span class="section-tag">World</span>
-                <span>23m ago</span>
+                <span>32m ago</span>
                 
             </div>
             <div class="summary-preview">Also in this newsletter: Compromise in Italo-Swiss fight over Alpine fire tragedy costs</div>
@@ -475,7 +538,7 @@
             <a href="https://www.ft.com/content/78639475-5a87-4e3b-9b6d-b58400634a4e" target="_blank" rel="noopener">Join FT Alphaville for drinks this Thursday from 9pm at Market Place St Paul’s</a>
             <div class="meta">
                 <span class="section-tag">World</span>
-                <span>38m ago</span>
+                <span>47m ago</span>
                 
             </div>
             <div class="summary-preview">The pub quiz after-party is ON</div>
@@ -483,56 +546,11 @@
         <div class="article" data-title="FirstFT: Renewed attacks threaten US-Iran truce" data-summary="Also in today’s newsletter: LVMH to offload brands and Deutsche Bank lawsuit" data-pub="Financial Times" data-published="2026-05-05T04:31:48+00:00">
             <a href="https://www.ft.com/content/be152f43-ae47-471a-a2de-7a90dd01fe38" target="_blank" rel="noopener">FirstFT: Renewed attacks threaten US-Iran truce</a>
             <div class="meta">
-                <span class="section-tag">Companies</span>
-                <span>51m ago</span>
+                <span class="section-tag">World</span>
+                <span>1h ago</span>
                 
             </div>
             <div class="summary-preview">Also in today’s newsletter: LVMH to offload brands and Deutsche Bank lawsuit</div>
-        </div>
-        <div class="article" data-title="Consumers face more pain as companies threaten price rises" data-summary="Executives warn that a prolonged energy shock would increase pressure to pass on costs to customers" data-pub="Financial Times" data-published="2026-05-05T04:00:34+00:00">
-            <a href="https://www.ft.com/content/f2d0d112-6e04-4f88-878e-30cb34ce1c2a" target="_blank" rel="noopener">Consumers face more pain as companies threaten price rises</a>
-            <div class="meta">
-                <span class="section-tag">Markets</span>
-                <span>1h ago</span>
-                
-            </div>
-            <div class="summary-preview">Executives warn that a prolonged energy shock would increase pressure to pass on costs to customers</div>
-        </div>
-        <div class="article" data-title="Why the Iran war might not spur a faster transition to low-carbon energy" data-summary="Increased priority on security of power supply might see some countries double down on fossil fuels" data-pub="Financial Times" data-published="2026-05-05T04:00:34+00:00">
-            <a href="https://www.ft.com/content/2dc28c0c-ff06-4eea-bd19-60939c0da9bb" target="_blank" rel="noopener">Why the Iran war might not spur a faster transition to low-carbon energy</a>
-            <div class="meta">
-                <span class="section-tag">Markets</span>
-                <span>1h ago</span>
-                
-            </div>
-            <div class="summary-preview">Increased priority on security of power supply might see some countries double down on fossil fuels</div>
-        </div>
-        <div class="article" data-title="Quantum computing moves closer to drug discovery with enzyme study" data-summary="Scientists have used the technology to model the behaviour of protein molecules" data-pub="Financial Times" data-published="2026-05-05T04:00:34+00:00">
-            <a href="https://www.ft.com/content/6d51a62c-433b-4334-a713-995c1ef1255c" target="_blank" rel="noopener">Quantum computing moves closer to drug discovery with enzyme study</a>
-            <div class="meta">
-                <span class="section-tag">Companies</span>
-                <span>1h ago</span>
-                
-            </div>
-            <div class="summary-preview">Scientists have used the technology to model the behaviour of protein molecules</div>
-        </div>
-        <div class="article" data-title="Golf must be careful of soaring prize money, says head of R&amp;A" data-summary="Mark Darbon says golf must heed lessons of English rugby, where clubs raised wages beyond what revenues could support" data-pub="Financial Times" data-published="2026-05-05T04:00:34+00:00">
-            <a href="https://www.ft.com/content/03cd7899-6f4b-4d05-8601-fa21d20fa144" target="_blank" rel="noopener">Golf must be careful of soaring prize money, says head of R&amp;A</a>
-            <div class="meta">
-                <span class="section-tag">Companies</span>
-                <span>1h ago</span>
-                
-            </div>
-            <div class="summary-preview">Mark Darbon says golf must heed lessons of English rugby, where clubs raised wages beyond what revenues could support</div>
-        </div>
-        <div class="article" data-title="Can Wachtell withstand Big Law’s free-agent era?" data-summary="The firm’s lockstep pay structure looks quaint as fierce rainmaker poaching wars reshape the sector" data-pub="Financial Times" data-published="2026-05-05T04:00:34+00:00">
-            <a href="https://www.ft.com/content/200d8f6d-2865-4f44-8e7f-03d5b2b13103" target="_blank" rel="noopener">Can Wachtell withstand Big Law’s free-agent era?</a>
-            <div class="meta">
-                <span class="section-tag">Companies</span>
-                <span>1h ago</span>
-                
-            </div>
-            <div class="summary-preview">The firm’s lockstep pay structure looks quaint as fierce rainmaker poaching wars reshape the sector</div>
         </div>
         <div class="article" data-title="How not to defeat antisemitism" data-summary="The only way to overcome this scourge is to see it for what it is: racism" data-pub="Financial Times" data-published="2026-05-05T04:00:34+00:00">
             <a href="https://www.ft.com/content/5cdfa840-06c9-4493-a54f-3175d889225e" target="_blank" rel="noopener">How not to defeat antisemitism</a>
@@ -542,6 +560,24 @@
                 
             </div>
             <div class="summary-preview">The only way to overcome this scourge is to see it for what it is: racism</div>
+        </div>
+        <div class="article" data-title="Consumers face more pain as companies threaten price rises" data-summary="Executives warn that a prolonged energy shock would increase pressure to pass on costs to customers" data-pub="Financial Times" data-published="2026-05-05T04:00:34+00:00">
+            <a href="https://www.ft.com/content/f2d0d112-6e04-4f88-878e-30cb34ce1c2a" target="_blank" rel="noopener">Consumers face more pain as companies threaten price rises</a>
+            <div class="meta">
+                <span class="section-tag">World</span>
+                <span>1h ago</span>
+                
+            </div>
+            <div class="summary-preview">Executives warn that a prolonged energy shock would increase pressure to pass on costs to customers</div>
+        </div>
+        <div class="article" data-title="Can Wachtell withstand Big Law’s free-agent era?" data-summary="The firm’s lockstep pay structure looks quaint as fierce rainmaker poaching wars reshape the sector" data-pub="Financial Times" data-published="2026-05-05T04:00:34+00:00">
+            <a href="https://www.ft.com/content/200d8f6d-2865-4f44-8e7f-03d5b2b13103" target="_blank" rel="noopener">Can Wachtell withstand Big Law’s free-agent era?</a>
+            <div class="meta">
+                <span class="section-tag">World</span>
+                <span>1h ago</span>
+                
+            </div>
+            <div class="summary-preview">The firm’s lockstep pay structure looks quaint as fierce rainmaker poaching wars reshape the sector</div>
         </div>
         <div class="article" data-title="How Germany’s Merz torpedoed his plan to contain Trump" data-summary="Swipe at US president appears to wipe out year-long effort to establish rapport" data-pub="Financial Times" data-published="2026-05-05T04:00:34+00:00">
             <a href="https://www.ft.com/content/2dd4b92c-4764-4bc5-a3a6-1418e0ccec58" target="_blank" rel="noopener">How Germany’s Merz torpedoed his plan to contain Trump</a>
@@ -570,18 +606,36 @@
             </div>
             <div class="summary-preview">Why aren’t more people quitting their jobs?</div>
         </div>
-        <div class="article" data-title="End of the line: why the Schroder family sold up" data-summary="The sale of the UK’s largest independent asset manager comes after the death of a patriarch and the rise of giant US funds" data-pub="Financial Times" data-published="2026-05-05T04:00:20+00:00">
-            <a href="https://www.ft.com/content/6af0dab9-39d0-4024-adb5-e3f6ac0254c6" target="_blank" rel="noopener">End of the line: why the Schroder family sold up</a>
+        <div class="article" data-title="Why the Iran war might not spur a faster transition to low-carbon energy" data-summary="Increased priority on security of power supply might see some countries double down on fossil fuels" data-pub="Financial Times" data-published="2026-05-05T04:00:34+00:00">
+            <a href="https://www.ft.com/content/2dc28c0c-ff06-4eea-bd19-60939c0da9bb" target="_blank" rel="noopener">Why the Iran war might not spur a faster transition to low-carbon energy</a>
             <div class="meta">
                 <span class="section-tag">Markets</span>
                 <span>1h ago</span>
                 
             </div>
-            <div class="summary-preview">The sale of the UK’s largest independent asset manager comes after the death of a patriarch and the rise of giant US funds</div>
+            <div class="summary-preview">Increased priority on security of power supply might see some countries double down on fossil fuels</div>
+        </div>
+        <div class="article" data-title="Quantum computing moves closer to drug discovery with enzyme study" data-summary="Scientists have used the technology to model the behaviour of protein molecules" data-pub="Financial Times" data-published="2026-05-05T04:00:34+00:00">
+            <a href="https://www.ft.com/content/6d51a62c-433b-4334-a713-995c1ef1255c" target="_blank" rel="noopener">Quantum computing moves closer to drug discovery with enzyme study</a>
+            <div class="meta">
+                <span class="section-tag">Companies</span>
+                <span>1h ago</span>
+                
+            </div>
+            <div class="summary-preview">Scientists have used the technology to model the behaviour of protein molecules</div>
+        </div>
+        <div class="article" data-title="Golf must be careful of soaring prize money, says head of R&amp;A" data-summary="Mark Darbon says golf must heed lessons of English rugby, where clubs raised wages beyond what revenues could support" data-pub="Financial Times" data-published="2026-05-05T04:00:34+00:00">
+            <a href="https://www.ft.com/content/03cd7899-6f4b-4d05-8601-fa21d20fa144" target="_blank" rel="noopener">Golf must be careful of soaring prize money, says head of R&amp;A</a>
+            <div class="meta">
+                <span class="section-tag">Companies</span>
+                <span>1h ago</span>
+                
+            </div>
+            <div class="summary-preview">Mark Darbon says golf must heed lessons of English rugby, where clubs raised wages beyond what revenues could support</div>
         </div>
         </div>
     </div>
-    <div class="pub-card">
+    <div class="pub-card" data-tier="macro">
         <div class="pub-header" style="background:#472AAF;color:#fff">
             Bloomberg
             <span class="count">93 articles</span>
@@ -592,7 +646,7 @@
             <a href="https://www.bloomberg.com/news/articles/2026-05-05/ships-cluster-further-from-hormuz-strait-as-iran-widens-control" target="_blank" rel="noopener">Ships Cluster Further From Hormuz Strait as Iran Widens Control</a>
             <div class="meta">
                 <span class="section-tag">Markets</span>
-                <span>33m ago</span>
+                <span>43m ago</span>
                 <span>Weilun Soon</span>
             </div>
             <div class="summary-preview">Hundreds of vessels were seen clustering near Dubai on Tuesday, as more ships moved away from a still-empty Strait of Hormuz in response to Iran’s efforts to widen its area of control.</div>
@@ -601,7 +655,7 @@
             <a href="https://www.bloomberg.com/news/videos/2026-05-05/the-asia-trade-5-5-2026-video" target="_blank" rel="noopener">Markets on Edge as US, Iran Trade Fire in Gulf | The Asia Trade 5/5/2026</a>
             <div class="meta">
                 <span class="section-tag">Markets</span>
-                <span>46m ago</span>
+                <span>55m ago</span>
                 
             </div>
             <div class="summary-preview">&quot;Bloomberg: The Asia Trade&quot; brings you everything you need to know to get ahead as the trading day begins in Asia. Bloomberg TV is live from Tokyo and Sydney with Shery Ahn and Paul Allen, getting ins</div>
@@ -610,7 +664,7 @@
             <a href="https://www.bloomberg.com/news/articles/2026-05-05/yotta-data-said-to-hire-advisors-for-900-million-india-ipo" target="_blank" rel="noopener">Yotta Data Said to Hire Advisors for $900 Million India IPO</a>
             <div class="meta">
                 <span class="section-tag">Markets</span>
-                <span>51m ago</span>
+                <span>1h ago</span>
                 <span>Rajesh Mascarenhas, Baiju Kalesh</span>
             </div>
             <div class="summary-preview">Yotta Data Services Pvt. is weighing an initial public offering in Mumbai that could raise as much as $900 million and has engaged investment banks for the process, according to people familiar with t</div>
@@ -619,7 +673,7 @@
             <a href="https://www.bloomberg.com/news/articles/2026-05-05/scotland-election-labour-s-troubles-breathe-new-life-into-snp" target="_blank" rel="noopener">Starmer’s Troubles Breathe New Life Into Scotland’s Nationalists</a>
             <div class="meta">
                 <span class="section-tag">Politics</span>
-                <span>52m ago</span>
+                <span>1h ago</span>
                 <span>Laura Avetisyan, Rose Henderson</span>
             </div>
             <div class="summary-preview">Polls show the SNP is on course to win a fifth straight term in this week’s election after Labour’s collapse in popularity.</div>
@@ -725,36 +779,45 @@
         </div>
         </div>
     </div>
-    <div class="pub-card">
+    <div class="pub-card" data-tier="macro">
         <div class="pub-header" style="background:#0080C3;color:#fff">
             Wall Street Journal
             <span class="count">170 articles</span>
         </div>
         <div class="article-list">
             
+        <div class="article" data-title="Australia’s Central Bank Raises Rates for Third Straight Meeting" data-summary="The Reserve Bank of Australia delivered its third consecutive interest-rate increase, citing a deteriorating inflation outlook and warning of “plausible” scenarios where fuel-price pressures rise more" data-pub="Wall Street Journal" data-published="2026-05-05T05:30:00+00:00">
+            <a href="https://www.wsj.com/economy/central-banking/australias-central-bank-raises-rates-for-third-straight-meeting-3422fd85" target="_blank" rel="noopener">Australia’s Central Bank Raises Rates for Third Straight Meeting</a>
+            <div class="meta">
+                <span class="section-tag">Economy</span>
+                <span>2m ago</span>
+                <span>James Glynn</span>
+            </div>
+            <div class="summary-preview">The Reserve Bank of Australia delivered its third consecutive interest-rate increase, citing a deteriorating inflation outlook and warning of “plausible” scenarios where fuel-price pressures rise more</div>
+        </div>
+        <div class="article" data-title="Bud Brewer AB InBev Returns to Volume Growth" data-summary="The world’s largest brewer booked a 0.8% organic increase in total volumes over the first three months of the year, ending a period of sliding volumes." data-pub="Wall Street Journal" data-published="2026-05-05T05:29:00+00:00">
+            <a href="https://www.wsj.com/business/earnings/bud-brewer-ab-inbev-returns-to-volume-growth-bb8c9bc0?mod=pls_whats_news_us_business_f" target="_blank" rel="noopener">Bud Brewer AB InBev Returns to Volume Growth</a>
+            <div class="meta">
+                <span class="section-tag">US Business</span>
+                <span>3m ago</span>
+                <span>Joshua Kirby</span>
+            </div>
+            <div class="summary-preview">The world’s largest brewer booked a 0.8% organic increase in total volumes over the first three months of the year, ending a period of sliding volumes.</div>
+        </div>
         <div class="article" data-title="CK Hutchison Exits Vodafone Joint Venture for $5.8 Billion" data-summary="Vodafone Group will take full ownership of its joint venture with CK Hutchison after the Hong Kong conglomerate agreed to sell its stake in one of the U.K.’s largest mobile operators for more than US$" data-pub="Wall Street Journal" data-published="2026-05-05T05:06:00+00:00">
             <a href="https://www.wsj.com/business/telecom/ck-hutchison-exits-vodafone-joint-venture-for-5-8-billion-ca6659ee?mod=pls_whats_news_us_business_f" target="_blank" rel="noopener">CK Hutchison Exits Vodafone Joint Venture for $5.8 Billion</a>
             <div class="meta">
                 <span class="section-tag">US Business</span>
-                <span>17m ago</span>
+                <span>26m ago</span>
                 <span>Kimberley Kao</span>
             </div>
             <div class="summary-preview">Vodafone Group will take full ownership of its joint venture with CK Hutchison after the Hong Kong conglomerate agreed to sell its stake in one of the U.K.’s largest mobile operators for more than US$</div>
-        </div>
-        <div class="article" data-title="Australia’s Central Bank Raises Rates for Third Straight Meeting" data-summary="The Reserve Bank of Australia delivered its third consecutive interest-rate increase, citing a deteriorating inflation outlook and warning of “plausible” scenarios where fuel-price pressures rise more" data-pub="Wall Street Journal" data-published="2026-05-05T05:00:00+00:00">
-            <a href="https://www.wsj.com/economy/central-banking/australias-central-bank-raises-rates-for-third-straight-meeting-3422fd85" target="_blank" rel="noopener">Australia’s Central Bank Raises Rates for Third Straight Meeting</a>
-            <div class="meta">
-                <span class="section-tag">Economy</span>
-                <span>23m ago</span>
-                <span>James Glynn</span>
-            </div>
-            <div class="summary-preview">The Reserve Bank of Australia delivered its third consecutive interest-rate increase, citing a deteriorating inflation outlook and warning of “plausible” scenarios where fuel-price pressures rise more</div>
         </div>
         <div class="article" data-title="Most Asian Currencies Weaken Amid Risk-Off Sentiment" data-summary="Most Asian currencies weakened against the dollar amid risk-off sentiment." data-pub="Wall Street Journal" data-published="2026-05-05T04:55:00+00:00">
             <a href="https://www.wsj.com/finance/currencies/asian-currencies-consolidate-may-be-weighed-by-renewed-middle-east-tensions-2c3c669b?mod=rss_markets_main" target="_blank" rel="noopener">Most Asian Currencies Weaken Amid Risk-Off Sentiment</a>
             <div class="meta">
                 <span class="section-tag">Markets</span>
-                <span>28m ago</span>
+                <span>37m ago</span>
                 
             </div>
             <div class="summary-preview">Most Asian currencies weakened against the dollar amid risk-off sentiment.</div>
@@ -763,7 +826,7 @@
             <a href="https://www.wsj.com/finance/banking/hsbc-posts-flat-quarterly-net-profit-11339e59?mod=rss_markets_main" target="_blank" rel="noopener">HSBC Posts Flat Quarterly Net Profit</a>
             <div class="meta">
                 <span class="section-tag">Markets</span>
-                <span>41m ago</span>
+                <span>50m ago</span>
                 <span>Kosaku Narioka</span>
             </div>
             <div class="summary-preview">The London-based bank said first-quarter net profit was largely flat as higher credit charges amid the Middle East conflict offset the strength in its Hong Kong, U.K. and wealth businesses.</div>
@@ -772,7 +835,7 @@
             <a href="https://www.wsj.com/finance/banking/hsbc-posts-flat-quarterly-net-profit-11339e59?mod=pls_whats_news_us_business_f" target="_blank" rel="noopener">HSBC Posts Flat Quarterly Net Profit</a>
             <div class="meta">
                 <span class="section-tag">US Business</span>
-                <span>41m ago</span>
+                <span>50m ago</span>
                 <span>Kosaku Narioka</span>
             </div>
             <div class="summary-preview">The London-based bank said first-quarter net profit was largely flat as higher credit charges amid the Middle East conflict offset the strength in its Hong Kong, U.K. and wealth businesses.</div>
@@ -813,15 +876,6 @@
             </div>
             <div class="summary-preview">Gold could rise as long as consensus and Federal Reserve forward guidance point toward future easing, said State Street Investment Management.</div>
         </div>
-        <div class="article" data-title="Iran Is Using Its 1980s Playbook, Plus Drones, to Cripple Global Shipping" data-summary="Four decades ago, Iran and the U.S. were on a collision course over oil shipping, an episode with inexact parallels to today’s war." data-pub="Wall Street Journal" data-published="2026-05-05T02:00:00+00:00">
-            <a href="https://www.wsj.com/world/middle-east/iran-is-using-its-1980s-playbook-plus-drones-to-cripple-global-shipping-51fb17da" target="_blank" rel="noopener">Iran Is Using Its 1980s Playbook, Plus Drones, to Cripple Global Shipping</a>
-            <div class="meta">
-                <span class="section-tag">World</span>
-                <span>3h ago</span>
-                <span>James T. Areddy</span>
-            </div>
-            <div class="summary-preview">Four decades ago, Iran and the U.S. were on a collision course over oil shipping, an episode with inexact parallels to today’s war.</div>
-        </div>
         <div class="article" data-title="Why the Collapse of Spirit Airlines Means Higher Fares for Everyone" data-summary="The defunct budget airline had long been a competitive force on lower-cost tickets." data-pub="Wall Street Journal" data-published="2026-05-05T02:00:00+00:00">
             <a href="https://www.wsj.com/business/airlines/why-the-collapse-of-spirit-airlines-means-higher-fares-for-everyone-0e4990aa?mod=pls_whats_news_us_business_f" target="_blank" rel="noopener">Why the Collapse of Spirit Airlines Means Higher Fares for Everyone</a>
             <div class="meta">
@@ -830,6 +884,15 @@
                 <span>Dean Seal</span>
             </div>
             <div class="summary-preview">The defunct budget airline had long been a competitive force on lower-cost tickets.</div>
+        </div>
+        <div class="article" data-title="Iran Is Using Its 1980s Playbook, Plus Drones, to Cripple Global Shipping" data-summary="Four decades ago, Iran and the U.S. were on a collision course over oil shipping, an episode with inexact parallels to today’s war." data-pub="Wall Street Journal" data-published="2026-05-05T02:00:00+00:00">
+            <a href="https://www.wsj.com/world/middle-east/iran-is-using-its-1980s-playbook-plus-drones-to-cripple-global-shipping-51fb17da" target="_blank" rel="noopener">Iran Is Using Its 1980s Playbook, Plus Drones, to Cripple Global Shipping</a>
+            <div class="meta">
+                <span class="section-tag">World</span>
+                <span>3h ago</span>
+                <span>James T. Areddy</span>
+            </div>
+            <div class="summary-preview">Four decades ago, Iran and the U.S. were on a collision course over oil shipping, an episode with inexact parallels to today’s war.</div>
         </div>
         <div class="article" data-title="Oil Futures Fall on Possible Technical Correction" data-summary="Oil futures fell in early Asian trade on a possible technical correction after WTI and Brent futures settled markedly higher on Monday." data-pub="Wall Street Journal" data-published="2026-05-05T01:14:00+00:00">
             <a href="https://www.wsj.com/finance/commodities-futures/oil-futures-fall-on-possible-technical-correction-21216651?mod=rss_markets_main" target="_blank" rel="noopener">Oil Futures Fall on Possible Technical Correction</a>
@@ -858,18 +921,9 @@
             </div>
             <div class="summary-preview">The company is considering an Alphabet-like structure for its portfolio of products, though no discussions are currently active.</div>
         </div>
-        <div class="article" data-title="The Secret Team Blowing Up Ford’s Assembly Line to Make a $30,000 Electric Truck" data-summary="The automaker brought together Silicon Valley techies and industry misfits in a quest to beat China at EVs." data-pub="Wall Street Journal" data-published="2026-05-05T01:00:00+00:00">
-            <a href="https://www.wsj.com/business/autos/ford-ev-electric-truck-7fdb0e0a?mod=pls_whats_news_us_business_f" target="_blank" rel="noopener">The Secret Team Blowing Up Ford’s Assembly Line to Make a $30,000 Electric Truck</a>
-            <div class="meta">
-                <span class="section-tag">US Business</span>
-                <span>4h ago</span>
-                <span>Sharon Terlep</span>
-            </div>
-            <div class="summary-preview">The automaker brought together Silicon Valley techies and industry misfits in a quest to beat China at EVs.</div>
-        </div>
         </div>
     </div>
-    <div class="pub-card">
+    <div class="pub-card" data-tier="macro">
         <div class="pub-header" style="background:#1A1A1A;color:#fff">
             New York Times
             <span class="count">101 articles</span>
@@ -880,7 +934,7 @@
             <a href="https://www.nytimes.com/2026/05/05/us/us-military-boat-strike-caribbean.html" target="_blank" rel="noopener">U.S. Military Strikes Boat in Caribbean, Killing 2</a>
             <div class="meta">
                 <span class="section-tag">Home</span>
-                <span>21m ago</span>
+                <span>31m ago</span>
                 <span>John Yoon</span>
             </div>
             <div class="summary-preview">The aerial strike raised the death toll to at least 187 in the U.S. campaign against boats the Trump administration accuses of smuggling drugs.</div>
@@ -889,7 +943,7 @@
             <a href="https://www.nytimes.com/2026/05/05/opinion/keir-starmer-britain-democrats.html" target="_blank" rel="noopener">Democrats, Keir Starmer Is a Warning</a>
             <div class="meta">
                 <span class="section-tag">Home</span>
-                <span>23m ago</span>
+                <span>32m ago</span>
                 <span>Samuel Earle</span>
             </div>
             <div class="summary-preview">Keir Starmer’s collapse was written into the nature of his victory.</div>
@@ -898,7 +952,7 @@
             <a href="https://www.nytimes.com/live/2026/05/04/world/iran-hormuz-ships-navy" target="_blank" rel="noopener">Iran War Live Updates: Attacks in Gulf Threaten to Reignite Conflict</a>
             <div class="meta">
                 <span class="section-tag">World</span>
-                <span>23m ago</span>
+                <span>33m ago</span>
                 <span>The New York Times</span>
             </div>
             <div class="summary-preview">U.S. warships shot down missiles and drones aimed at ships the Navy was guiding through the Strait of Hormuz, and the authorities in the United Arab Emirates blamed Iran for a drone attack.</div>
@@ -907,7 +961,7 @@
             <a href="https://www.nytimes.com/2026/05/04/world/europe/moscow-drone-attack.html" target="_blank" rel="noopener">Drone Hits a Moscow High-Rise Days Before a Major Military Parade</a>
             <div class="meta">
                 <span class="section-tag">World</span>
-                <span>25m ago</span>
+                <span>34m ago</span>
                 <span>Nataliya Vasilyeva and Matina Stevis-Gridneff</span>
             </div>
             <div class="summary-preview">Air defenses in the Russian capital were breached as Ukraine expands long-range strikes.</div>
@@ -916,7 +970,7 @@
             <a href="https://www.nytimes.com/2026/05/04/world/africa-russia-ukraine-war-attacks-strait-hormuz.html" target="_blank" rel="noopener">Tricked Into Fighting for Russia</a>
             <div class="meta">
                 <span class="section-tag">World</span>
-                <span>52m ago</span>
+                <span>1h ago</span>
                 <span>Katrin Bennhold</span>
             </div>
             <div class="summary-preview">Russia needs a lot of soldiers. Many Africans need work.</div>
@@ -987,8 +1041,8 @@
         <div class="article" data-title="Trump Administration Demands Names of 2020 Election Workers in Georgia" data-summary="The Justice Department again appears to be using the investigative power of the federal government to rehash debunked claims that Democrats stole the 2020 election." data-pub="New York Times" data-published="2026-05-05T02:26:17+00:00">
             <a href="https://www.nytimes.com/2026/05/04/us/politics/trump-2020-georgia-election-workers.html" target="_blank" rel="noopener">Trump Administration Demands Names of 2020 Election Workers in Georgia</a>
             <div class="meta">
-                <span class="section-tag">Home</span>
-                <span>2h ago</span>
+                <span class="section-tag">Politics</span>
+                <span>3h ago</span>
                 <span>Nick Corasaniti, Richard Fausset and Alan Feuer</span>
             </div>
             <div class="summary-preview">The Justice Department again appears to be using the investigative power of the federal government to rehash debunked claims that Democrats stole the 2020 election.</div>
@@ -1013,7 +1067,7 @@
         </div>
         </div>
     </div>
-    <div class="pub-card">
+    <div class="pub-card" data-tier="macro">
         <div class="pub-header" style="background:#E3120B;color:#fff">
             The Economist
             <span class="count">5 articles</span>
@@ -1067,7 +1121,7 @@
         </div>
         </div>
     </div>
-    <div class="pub-card">
+    <div class="pub-card" data-tier="macro">
         <div class="pub-header" style="background:#C8102E;color:#fff">
             Harvard Business Review
             <span class="count">18 articles</span>
@@ -1096,7 +1150,7 @@
             <a href="https://hbr.org/2026/05/stop-trying-to-replicate-a-single-star-performer" target="_blank" rel="noopener">Stop Trying to Replicate a Single Star Performer</a>
             <div class="meta">
                 <span class="section-tag">Latest</span>
-                <span>16h ago</span>
+                <span>17h ago</span>
                 <span>Jerker Denrell</span>
             </div>
             <div class="summary-preview">When organizations fixate on just one role model, they erase the very diversity that drives innovation.</div>
@@ -1105,7 +1159,7 @@
             <a href="https://hbr.org/2026/05/will-insurance-protect-your-company-in-times-of-war" target="_blank" rel="noopener">Will Insurance Protect Your Company in Times of War?</a>
             <div class="meta">
                 <span class="section-tag">Latest</span>
-                <span>16h ago</span>
+                <span>17h ago</span>
                 <span>Tom Johansmeyer</span>
             </div>
             <div class="summary-preview">Leaders shouldn’t assume that the war exclusion means that they’re out of luck if conflict harms their business.</div>
@@ -1211,7 +1265,7 @@
         </div>
         </div>
     </div>
-    <div class="pub-card">
+    <div class="pub-card" data-tier="techpress">
         <div class="pub-header" style="background:#5200FF;color:#fff">
             The Verge — AI
             <span class="count">5 articles</span>
@@ -1265,7 +1319,7 @@
         </div>
         </div>
     </div>
-    <div class="pub-card">
+    <div class="pub-card" data-tier="techpress">
         <div class="pub-header" style="background:#0A9C3A;color:#fff">
             TechCrunch — AI
             <span class="count">11 articles</span>
@@ -1276,7 +1330,7 @@
             <a href="https://techcrunch.com/2026/05/04/as-workers-worry-about-ai-nvidias-jensen-huang-says-ai-is-creating-an-enormous-number-of-jobs/" target="_blank" rel="noopener">As workers worry about AI, Nvidia’s Jensen Huang says AI is ‘creating an enormous number of jobs’</a>
             <div class="meta">
                 <span class="section-tag">AI</span>
-                <span>1h ago</span>
+                <span>2h ago</span>
                 <span>Lucas Ropek</span>
             </div>
             <div class="summary-preview">The Nvidia CEO seems to feel that claims of AI&#x27;s job-killing potential have been greatly exaggerated.</div>
@@ -1373,7 +1427,7 @@
         </div>
         </div>
     </div>
-    <div class="pub-card">
+    <div class="pub-card" data-tier="techpress">
         <div class="pub-header" style="background:#1A1A1A;color:#fff">
             Wired — AI
             <span class="count">1 articles</span>
@@ -1391,7 +1445,7 @@
         </div>
         </div>
     </div>
-    <div class="pub-card">
+    <div class="pub-card" data-tier="techpress">
         <div class="pub-header" style="background:#FF4F00;color:#fff">
             Ars Technica — AI
             <span class="count">4 articles</span>
@@ -1436,7 +1490,7 @@
         </div>
         </div>
     </div>
-    <div class="pub-card">
+    <div class="pub-card" data-tier="techpress">
         <div class="pub-header" style="background:#E5092F;color:#fff">
             MIT Technology Review
             <span class="count">10 articles</span>
@@ -1535,7 +1589,7 @@
         </div>
         </div>
     </div>
-    <div class="pub-card">
+    <div class="pub-card" data-tier="techpress">
         <div class="pub-header" style="background:#00629B;color:#fff">
             IEEE Spectrum — AI
             <span class="count">3 articles</span>
@@ -1571,7 +1625,7 @@
         </div>
         </div>
     </div>
-    <div class="pub-card">
+    <div class="pub-card" data-tier="techpress">
         <div class="pub-header" style="background:#0F172A;color:#fff">
             The Decoder
             <span class="count">10 articles</span>
@@ -1670,7 +1724,7 @@
         </div>
         </div>
     </div>
-    <div class="pub-card">
+    <div class="pub-card" data-tier="techpress">
         <div class="pub-header" style="background:#005594;color:#fff">
             CNBC — Technology
             <span class="count">18 articles</span>
@@ -1681,7 +1735,7 @@
             <a href="https://www.cnbc.com/2026/05/01/japan-airlines-humanoid-robots-haneda-labor-shortage.html" target="_blank" rel="noopener">Japan Airlines begins humanoid robot trials at Tokyo&#x27;s Haneda airport as labor shortages bite</a>
             <div class="meta">
                 <span class="section-tag">Technology</span>
-                <span>35m ago</span>
+                <span>45m ago</span>
                 
             </div>
             <div class="summary-preview">Tokyo&#x27;s Haneda Airport is beginning a trial of humanoid robots in airport ground services amid chronic labor challenges and a rapidly ageing workforce.</div>
@@ -1735,7 +1789,7 @@
             <a href="https://www.cnbc.com/2026/05/04/jim-cramer-own-stocks-dominate-new-economy.html" target="_blank" rel="noopener">Jim Cramer says to own these types of stocks that &#x27;dominate the new economy&#x27;</a>
             <div class="meta">
                 <span class="section-tag">Technology</span>
-                <span>6h ago</span>
+                <span>7h ago</span>
                 
             </div>
             <div class="summary-preview">CNBC&#x27;s Jim Cramer said the computer-driven economy doesn&#x27;t care about oil prices or interest rates.</div>
@@ -1798,7 +1852,7 @@
             <a href="https://www.cnbc.com/2026/05/02/musk-testimony-dominated-first-week-musk-v-altman-trial-in-oakland.html" target="_blank" rel="noopener">Musk testimony dominated first week of Musk v. Altman. &#x27;You can&#x27;t just steal a charity&#x27;</a>
             <div class="meta">
                 <span class="section-tag">Technology</span>
-                <span>17h ago</span>
+                <span>18h ago</span>
                 
             </div>
             <div class="summary-preview">Elon Musk, the world&#x27;s richest person, took the stand and testified over the course of three days in his trial against OpenAI CEO Sam Altman.</div>
@@ -1814,7 +1868,7 @@
         </div>
         </div>
     </div>
-    <div class="pub-card">
+    <div class="pub-card" data-tier="techpress">
         <div class="pub-header" style="background:#A8232C;color:#fff">
             The Register
             <span class="count">20 articles</span>
@@ -1825,7 +1879,7 @@
             <a href="https://go.theregister.com/feed/www.theregister.com/2026/05/05/azure_reservations_end_old_vms/" target="_blank" rel="noopener">Microsoft to stop taking reservations for 17 Azure VM flavours, kill 13 in 2028</a>
             <div class="meta">
                 <span class="section-tag">Tech</span>
-                <span>29m ago</span>
+                <span>39m ago</span>
                 <span>Simon Sharwood</span>
             </div>
             <div class="summary-preview">Haswell’s had its day and Skylake and Cascade Lake are draining away Microsoft will stop offering long-term rentals for 17 Azure instance types – most of them powered by CPUs Intel released in the 201</div>
@@ -1888,7 +1942,7 @@
             <a href="https://go.theregister.com/feed/www.theregister.com/2026/05/04/notepad_dev_demands_unofficial_macos/" target="_blank" rel="noopener">Hands off my trademark! Notepad++ dev threatens legal action against macOS port</a>
             <div class="meta">
                 <span class="section-tag">Tech</span>
-                <span>12h ago</span>
+                <span>13h ago</span>
                 <span>Brandon Vigliarolo</span>
             </div>
             <div class="summary-preview">It&#x27;s not the fork that&#x27;s the problem, it&#x27;s the attempt to make it look official, says original Notepad++ dev Don Ho Notepad++ remains a Windows-only app, at least under that name. The beloved develope</div>
@@ -1958,7 +2012,7 @@
         </div>
         </div>
     </div>
-    <div class="pub-card">
+    <div class="pub-card" data-tier="techpress">
         <div class="pub-header" style="background:#1858A7;color:#fff">
             Axios — Technology
             <span class="count">20 articles</span>
@@ -1969,7 +2023,7 @@
             <a href="https://www.axios.com/2026/05/05/ai-agents-run-lean-business" target="_blank" rel="noopener">You built it with AI. Now run it with AI.</a>
             <div class="meta">
                 <span class="section-tag">All</span>
-                <span>3h ago</span>
+                <span>4h ago</span>
                 <span>Jim VandeHei</span>
             </div>
             <div class="summary-preview">I&#x27;m offering you four specific ways to get more out of AI: better prompting, improving AI memory, starting a business using AI and running a business using AI (tonight).Congrats! You started a busines</div>
@@ -2095,14 +2149,14 @@
             <a href="https://www.axios.com/2026/05/04/kalshi-prediction-market-trading-rules" target="_blank" rel="noopener">Exclusive: Kalshi announces steps to keep kids off prediction market</a>
             <div class="meta">
                 <span class="section-tag">All</span>
-                <span>19h ago</span>
+                <span>20h ago</span>
                 <span>Nathan Bomey</span>
             </div>
             <div class="summary-preview">Kalshi is putting in place new tools to prevent minors from trading on the prediction market, but is resisting calls to block ages 18-20.Why it matters: Prediction markets are surging in popularity as</div>
         </div>
         </div>
     </div>
-    <div class="pub-card">
+    <div class="pub-card" data-tier="techpress">
         <div class="pub-header" style="background:#0E1A2B;color:#fff">
             Rest of World
             <span class="count">1 articles</span>
@@ -2120,7 +2174,7 @@
         </div>
         </div>
     </div>
-    <div class="pub-card">
+    <div class="pub-card" data-tier="aggregators">
         <div class="pub-header" style="background:#FF6600;color:#fff">
             Hacker News
             <span class="count">40 articles</span>
@@ -2131,7 +2185,7 @@
             <a href="https://medium.com/@cmitre/the-week-my-ai-assistant-tried-to-end-me-and-accidentally-helped-me-build-a-better-model-a2a6e43a5c52" target="_blank" rel="noopener">The week my AI assistant deleted my production model (and made it better)</a>
             <div class="meta">
                 <span class="section-tag">AI Filter</span>
-                <span>2m ago</span>
+                <span>12m ago</span>
                 <span>ceemite</span>
             </div>
             <div class="summary-preview">Article URL: https://medium.com/@cmitre/the-week-my-ai-assistant-tried-to-end-me-and-accidentally-helped-me-build-a-better-model-a2a6e43a5c52 Comments URL: https://news.ycombinator.com/item?id=4801836</div>
@@ -2140,7 +2194,7 @@
             <a href="https://www.anthropic.com/news/enterprise-ai-services-company" target="_blank" rel="noopener">Anthropic entering AI services business</a>
             <div class="meta">
                 <span class="section-tag">AI Filter</span>
-                <span>5m ago</span>
+                <span>15m ago</span>
                 <span>darshanmakwana</span>
             </div>
             <div class="summary-preview">Article URL: https://www.anthropic.com/news/enterprise-ai-services-company Comments URL: https://news.ycombinator.com/item?id=48018344 Points: 1 # Comments: 0</div>
@@ -2149,7 +2203,7 @@
             <a href="https://www.indiehackers.com/post/i-built-a-wordpress-ai-agent-that-handles-sales-and-support-no-monthly-fees-ICax5uOircJAVYrmRH1N" target="_blank" rel="noopener">I built a WordPress AI agent that handles sales and support (No monthly fees)</a>
             <div class="meta">
                 <span class="section-tag">AI Filter</span>
-                <span>14m ago</span>
+                <span>24m ago</span>
                 <span>shahisoft</span>
             </div>
             <div class="summary-preview">Article URL: https://www.indiehackers.com/post/i-built-a-wordpress-ai-agent-that-handles-sales-and-support-no-monthly-fees-ICax5uOircJAVYrmRH1N Comments URL: https://news.ycombinator.com/item?id=48018</div>
@@ -2158,7 +2212,7 @@
             <a href="https://importai.substack.com/p/import-ai-455-automating-ai-research" target="_blank" rel="noopener">Anthropic co-founder Jack Clark: 60%+ chance of automated AI R&amp;D by 2029</a>
             <div class="meta">
                 <span class="section-tag">AI Filter</span>
-                <span>26m ago</span>
+                <span>36m ago</span>
                 <span>thoughtpeddler</span>
             </div>
             <div class="summary-preview">Article URL: https://importai.substack.com/p/import-ai-455-automating-ai-research Comments URL: https://news.ycombinator.com/item?id=48018212 Points: 4 # Comments: 1</div>
@@ -2167,7 +2221,7 @@
             <a href="https://sha.africauncensored.online/" target="_blank" rel="noopener">Kenya: AI was used to load Health System costs onto poorest</a>
             <div class="meta">
                 <span class="section-tag">AI Filter</span>
-                <span>26m ago</span>
+                <span>36m ago</span>
                 <span>gmargari</span>
             </div>
             <div class="summary-preview">Article URL: https://sha.africauncensored.online/ Comments URL: https://news.ycombinator.com/item?id=48018211 Points: 2 # Comments: 0</div>
@@ -2176,7 +2230,7 @@
             <a href="https://sfstandard.com/2026/03/05/engineer-2025-ai-land-everyone-s-builder-now/" target="_blank" rel="noopener">&#x27;Engineer&#x27; is so 2025. In AI land, everyone&#x27;s a &#x27;builder&#x27; now</a>
             <div class="meta">
                 <span class="section-tag">AI Filter</span>
-                <span>30m ago</span>
+                <span>39m ago</span>
                 <span>geetee</span>
             </div>
             <div class="summary-preview">Article URL: https://sfstandard.com/2026/03/05/engineer-2025-ai-land-everyone-s-builder-now/ Comments URL: https://news.ycombinator.com/item?id=48018189 Points: 2 # Comments: 0</div>
@@ -2185,7 +2239,7 @@
             <a href="https://walzr.com/empty-screenings" target="_blank" rel="noopener">About 10% of AMC movie showings sell zero tickets. This site finds them</a>
             <div class="meta">
                 <span class="section-tag">Front Page</span>
-                <span>49m ago</span>
+                <span>59m ago</span>
                 <span>MrBuddyCasino</span>
             </div>
             <div class="summary-preview">Article URL: https://walzr.com/empty-screenings Comments URL: https://news.ycombinator.com/item?id=48018066 Points: 37 # Comments: 13</div>
@@ -2194,7 +2248,7 @@
             <a href="https://www.businessinsider.com/ethan-mollick-ai-expert-wharton-taste-skills-ai-2026-5" target="_blank" rel="noopener">Ethan Mollick: Taste is becoming a key skill in the AI era</a>
             <div class="meta">
                 <span class="section-tag">AI Filter</span>
-                <span>54m ago</span>
+                <span>1h ago</span>
                 <span>sahar_builds</span>
             </div>
             <div class="summary-preview">Article URL: https://www.businessinsider.com/ethan-mollick-ai-expert-wharton-taste-skills-ai-2026-5 Comments URL: https://news.ycombinator.com/item?id=48018040 Points: 4 # Comments: 0</div>
@@ -2248,7 +2302,7 @@
             <a href="https://www.theguardian.com/music/2026/may/05/canadian-ashley-macisaac-fiddler-musician-singer-songwriter-sues-google-ai-sex-offender-ntwnfb" target="_blank" rel="noopener">Fiddler sues Google after AI Overview wrongly claimed he was a sex offender</a>
             <div class="meta">
                 <span class="section-tag">AI Filter</span>
-                <span>1h ago</span>
+                <span>2h ago</span>
                 <span>prawn</span>
             </div>
             <div class="summary-preview">Article URL: https://www.theguardian.com/music/2026/may/05/canadian-ashley-macisaac-fiddler-musician-singer-songwriter-sues-google-ai-sex-offender-ntwnfb Comments URL: https://news.ycombinator.com/ite</div>
@@ -2264,7 +2318,7 @@
         </div>
         </div>
     </div>
-    <div class="pub-card">
+    <div class="pub-card" data-tier="aggregators">
         <div class="pub-header" style="background:#0066CC;color:#fff">
             Techmeme
             <span class="count">15 articles</span>
@@ -2275,7 +2329,7 @@
             <a href="https://www.techmeme.com/260505/p1#a260505p1" target="_blank" rel="noopener">Kuo: OpenAI appears to be fast-tracking its AI agent phone with two NPUs and a custom MediaTek Dimensity 9600 SoC, targeting mass production as early as H1 2027 (@mingchikuo)</a>
             <div class="meta">
                 <span class="section-tag">Tech Meta</span>
-                <span>18m ago</span>
+                <span>27m ago</span>
                 
             </div>
             <div class="summary-preview">@mingchikuo: Kuo: OpenAI appears to be fast-tracking its AI agent phone with two NPUs and a custom MediaTek Dimensity 9600 SoC, targeting mass production as early as H1 2027 — 【Industry Check Update】O</div>
@@ -2302,7 +2356,7 @@
             <a href="https://www.techmeme.com/260504/p47#a260504p47" target="_blank" rel="noopener">Sources: Sam Altman discussed spinning out OpenAI&#x27;s robotics and consumer hardware divisions in late 2025 to give them more room to grow; the plan was rejected (Berber Jin/Wall Street Journal)</a>
             <div class="meta">
                 <span class="section-tag">Tech Meta</span>
-                <span>3h ago</span>
+                <span>4h ago</span>
                 
             </div>
             <div class="summary-preview">Berber Jin / Wall Street Journal: Sources: Sam Altman discussed spinning out OpenAI&#x27;s robotics and consumer hardware divisions in late 2025 to give them more room to grow; the plan was rejected — Comp</div>
@@ -2401,14 +2455,14 @@
             <a href="https://www.techmeme.com/260504/p36#a260504p36" target="_blank" rel="noopener">Pinterest reports Q1 revenue up 18% YoY to $1B, vs. $966M est., MAUs up 11% YoY to 631M, and forecasts Q2 revenue above estimates; PINS jumps 17%+ after hours (Jonathan Vanian/CNBC)</a>
             <div class="meta">
                 <span class="section-tag">Tech Meta</span>
-                <span>8h ago</span>
+                <span>9h ago</span>
                 
             </div>
             <div class="summary-preview">Jonathan Vanian / CNBC: Pinterest reports Q1 revenue up 18% YoY to $1B, vs. $966M est., MAUs up 11% YoY to 631M, and forecasts Q2 revenue above estimates; PINS jumps 17%+ after hours — Pinterest repor</div>
         </div>
         </div>
     </div>
-    <div class="pub-card">
+    <div class="pub-card" data-tier="aggregators">
         <div class="pub-header" style="background:#FF4500;color:#fff">
             r/MachineLearning
             <span class="count">21 articles</span>
@@ -2419,7 +2473,7 @@
             <a href="https://www.reddit.com/r/MachineLearning/comments/1t45ggk/fixing_unsupervised_hyperbolic_contrastive_loss_d/" target="_blank" rel="noopener">Fixing Unsupervised Hyperbolic Contrastive Loss [D]</a>
             <div class="meta">
                 <span class="section-tag">Top</span>
-                <span>35m ago</span>
+                <span>44m ago</span>
                 <span>/u/arjun_r_kaushik</span>
             </div>
             <div class="summary-preview">Hello all, I am trying to implement Unsupervised Hyperbolic Contrastive Loss on the ImageNet-1k dataset. My results show that simple Euclidean unsupervised contrastive loss is much better than the hyp</div>
@@ -2428,7 +2482,7 @@
             <a href="https://www.reddit.com/r/MachineLearning/comments/1t3zovv/neurips_how_can_i_submit_the_link_to_the_code_d/" target="_blank" rel="noopener">Neurips, how can i submit the &quot;link&quot; to the code? [D]</a>
             <div class="meta">
                 <span class="section-tag">Top</span>
-                <span>4h ago</span>
+                <span>5h ago</span>
                 <span>/u/BetterbeBattery</span>
             </div>
             <div class="summary-preview">It seems that the supplementary section doesn&#x27;t accept text. Can I just submit the PDF file that has link to it? submitted by /u/BetterbeBattery [link] [comments]</div>
@@ -2473,7 +2527,7 @@
             <a href="https://www.reddit.com/r/MachineLearning/comments/1t3ogbw/p_qlora_finetuning_of_qwen2515b_for_cefr_english/" target="_blank" rel="noopener">[P] QLoRA Fine-Tuning of Qwen2.5-1.5B for CEFR English Proficiency Classification (A1–C2) [P]</a>
             <div class="meta">
                 <span class="section-tag">Top</span>
-                <span>11h ago</span>
+                <span>12h ago</span>
                 <span>/u/Professional-Pie6704</span>
             </div>
             <div class="summary-preview">I fine-tuned Qwen2.5-1.5B for multi-class CEFR English proficiency classification using QLoRA (4-bit NF4). The goal was to classify English text into one of the 6 CEFR levels (A1 → C2), which can be u</div>
@@ -2552,7 +2606,7 @@
         </div>
         </div>
     </div>
-    <div class="pub-card">
+    <div class="pub-card" data-tier="aggregators">
         <div class="pub-header" style="background:#FF4500;color:#fff">
             r/LocalLLaMA
             <span class="count">23 articles</span>
@@ -2563,7 +2617,7 @@
             <a href="https://www.reddit.com/r/LocalLLaMA/comments/1t45g3l/peanut_text_to_image_model_open_weights_coming/" target="_blank" rel="noopener">Peanut - Text to Image Model (Open Weights coming soon)</a>
             <div class="meta">
                 <span class="section-tag">Top</span>
-                <span>35m ago</span>
+                <span>45m ago</span>
                 <span>/u/pmttyji</span>
             </div>
             <div class="summary-preview">A new anonymous model debuts at #8 in the Artificial Analysis Text to Image Arena! Peanut’s weights are expected to be released soon, which would make it the leading Text to Image Open Weights Model. </div>
@@ -2581,7 +2635,7 @@
             <a href="https://www.reddit.com/r/LocalLLaMA/comments/1t3zuvy/mtplx_224x_faster_tps_the_native_mtp_inference/" target="_blank" rel="noopener">MTPLX | 2.24x faster TPS | The native MTP inference engine for Apple Silicon</a>
             <div class="meta">
                 <span class="section-tag">Top</span>
-                <span>4h ago</span>
+                <span>5h ago</span>
                 <span>/u/YoussofAl</span>
             </div>
             <div class="summary-preview">TLDR: 28 tok/s → 63 tok/s on Qwen3.6-27B on a MacBook Pro M5 Max. 2.24× faster at real temperature 0.6. Works for coding, creative writing, and chat https://i.redd.it/i9x794c0q7zg1.gif Works on ANY MT</div>
@@ -2590,7 +2644,7 @@
             <a href="https://www.reddit.com/r/LocalLLaMA/comments/1t3zu7u/vllm_just_merged_turboquant_fix_for_qwen_35/" target="_blank" rel="noopener">vLLM Just Merged TurboQuant Fix for Qwen 3.5+</a>
             <div class="meta">
                 <span class="section-tag">Top</span>
-                <span>4h ago</span>
+                <span>5h ago</span>
                 <span>/u/havenoammo</span>
             </div>
             <div class="summary-preview">Previously it was throwing a &#x27;Not Implemented&#x27; error due to Mamba layers. Going to test it now! https://github.com/vllm-project/vllm/pull/39931 Edit: Works with Qwen 3.6, tested with 27B Can be used w</div>
@@ -2689,14 +2743,14 @@
             <a href="https://www.reddit.com/r/LocalLLaMA/comments/1t3hokh/llmsearchindex_an_open_source_local_web_search/" target="_blank" rel="noopener">LLMSearchIndex- an Open Source Local Web Search Library with over 200 million indexed Web Pages for RAG applications</a>
             <div class="meta">
                 <span class="section-tag">Top</span>
-                <span>15h ago</span>
+                <span>16h ago</span>
                 <span>/u/zakerytclarke</span>
             </div>
             <div class="summary-preview">I&#x27;ve been pretty unsatisfied with web search options for local LLM/RAG systems. Most setups either rely on paid APIs like Brave, or meta search scrapers like SearXNG. So I built LLMSearchIndex- a Pyth</div>
         </div>
         </div>
     </div>
-    <div class="pub-card">
+    <div class="pub-card" data-tier="aggregators">
         <div class="pub-header" style="background:#FF4500;color:#fff">
             r/singularity
             <span class="count">22 articles</span>
@@ -2707,7 +2761,7 @@
             <a href="https://www.reddit.com/r/singularity/comments/1t45bjp/what_is_elons_actual_plan_with_data_centers_in/" target="_blank" rel="noopener">What is Elon’s actual plan with data centers in space, and what is his long-term goal with Mars?</a>
             <div class="meta">
                 <span class="section-tag">Top</span>
-                <span>42m ago</span>
+                <span>52m ago</span>
                 <span>/u/Genzinvestor16180339</span>
             </div>
             <div class="summary-preview">What is the point of his plan can anyone explain it?I keep seeing mentions of Elon Musk talking about building data centers in space, but I do not fully understand the rationale. What problem is this </div>
@@ -2743,7 +2797,7 @@
             <a href="https://www.reddit.com/r/singularity/comments/1t3v9ef/and_americas_humanoid_robot_industry_is_ramping_up/" target="_blank" rel="noopener">And America’s Humanoid Robot industry is ramping up</a>
             <div class="meta">
                 <span class="section-tag">Top</span>
-                <span>7h ago</span>
+                <span>8h ago</span>
                 <span>/u/Distinct-Question-16</span>
             </div>
             <div class="summary-preview">Tesla Fremont will be up in summer, Gigafactory (the big one) next year. submitted by /u/Distinct-Question-16 [link] [comments]</div>
@@ -2788,7 +2842,7 @@
             <a href="https://www.reddit.com/r/singularity/comments/1t3russ/anthropic_cofounder_jack_clark_says_ai_is_nearing/" target="_blank" rel="noopener">Anthropic co-founder Jack Clark says AI is nearing the point where it can automate AI research</a>
             <div class="meta">
                 <span class="section-tag">Top</span>
-                <span>9h ago</span>
+                <span>10h ago</span>
                 <span>/u/Outside-Iron-8242</span>
             </div>
             <div class="summary-preview">Import AI 455: AI systems are about to start building themselves. Jack Clark thinks there’s a ~30% chance by the end of 2027 and a ~60%+ chance by the end of 2028 that AI research becomes automated, w</div>
@@ -2797,7 +2851,7 @@
             <a href="https://www.reddit.com/r/singularity/comments/1t3qbi6/andon_labs_blueprintbench_2_3d_spatial/" target="_blank" rel="noopener">Andon Labs :Blueprint-Bench 2. 3D Spatial Intelligence in models</a>
             <div class="meta">
                 <span class="section-tag">Top</span>
-                <span>10h ago</span>
+                <span>11h ago</span>
                 <span>/u/Wonderful_Buffalo_32</span>
             </div>
             <div class="summary-preview">https://x.com/andonlabs/status/2051348274666504587?s=20 submitted by /u/Wonderful_Buffalo_32 [link] [comments]</div>
@@ -2840,7 +2894,7 @@
         </div>
         </div>
     </div>
-    <div class="pub-card">
+    <div class="pub-card" data-tier="aggregators">
         <div class="pub-header" style="background:#2563EB;color:#fff">
             Last Week in AI
             <span class="count">2 articles</span>
@@ -2867,7 +2921,7 @@
         </div>
         </div>
     </div>
-    <div class="pub-card">
+    <div class="pub-card" data-tier="frontier">
         <div class="pub-header" style="background:#000000;color:#fff">
             OpenAI
             <span class="count">2 articles</span>
@@ -2894,7 +2948,7 @@
         </div>
         </div>
     </div>
-    <div class="pub-card">
+    <div class="pub-card" data-tier="frontier">
         <div class="pub-header" style="background:#76B900;color:#fff">
             NVIDIA Developer
             <span class="count">1 articles</span>
@@ -2912,7 +2966,7 @@
         </div>
         </div>
     </div>
-    <div class="pub-card">
+    <div class="pub-card" data-tier="frontier">
         <div class="pub-header" style="background:#1A4314;color:#fff">
             NVIDIA Research
             <span class="count">7 articles</span>
@@ -2984,7 +3038,7 @@
         </div>
         </div>
     </div>
-    <div class="pub-card">
+    <div class="pub-card" data-tier="frontier">
         <div class="pub-header" style="background:#1A1A1A;color:#fff">
             Apple ML Research
             <span class="count">10 articles</span>
@@ -3083,7 +3137,7 @@
         </div>
         </div>
     </div>
-    <div class="pub-card">
+    <div class="pub-card" data-tier="frontier">
         <div class="pub-header" style="background:#003E7E;color:#fff">
             Allen AI (Ai2)
             <span class="count">3 articles</span>
@@ -3119,7 +3173,7 @@
         </div>
         </div>
     </div>
-    <div class="pub-card">
+    <div class="pub-card" data-tier="frontier">
         <div class="pub-header" style="background:#8A1A2A;color:#fff">
             MIT News — AI
             <span class="count">6 articles</span>
@@ -3182,7 +3236,7 @@
         </div>
         </div>
     </div>
-    <div class="pub-card">
+    <div class="pub-card" data-tier="analysis">
         <div class="pub-header" style="background:#D4661F;color:#fff">
             Stratechery
             <span class="count">5 articles</span>
@@ -3236,7 +3290,7 @@
         </div>
         </div>
     </div>
-    <div class="pub-card">
+    <div class="pub-card" data-tier="analysis">
         <div class="pub-header" style="background:#0F766E;color:#fff">
             Latent Space
             <span class="count">7 articles</span>
@@ -3247,7 +3301,7 @@
             <a href="https://www.latent.space/p/ainews-the-other-vs-the-utility" target="_blank" rel="noopener">[AINews] The Other vs The Utility</a>
             <div class="meta">
                 <span class="section-tag">Engineering</span>
-                <span>5h ago</span>
+                <span>6h ago</span>
                 
             </div>
             <div class="summary-preview">a quiet day lets us reflect on the nature of AI &quot;character&quot; in the Clippy vs Anton debate</div>
@@ -3308,7 +3362,7 @@
         </div>
         </div>
     </div>
-    <div class="pub-card">
+    <div class="pub-card" data-tier="analysis">
         <div class="pub-header" style="background:#8B7355;color:#fff">
             Marginal Revolution
             <span class="count">9 articles</span>
@@ -3319,7 +3373,7 @@
             <a href="https://marginalrevolution.com/marginalrevolution/2026/05/is-psychotherapy-underdiscussed-these-days-from-my-email.html?utm_source=rss&amp;utm_medium=rss&amp;utm_campaign=is-psychotherapy-underdiscussed-these-days-from-my-email" target="_blank" rel="noopener">Is psychotherapy underdiscussed these days? (from my email)</a>
             <div class="meta">
                 <span class="section-tag">Economics+AI</span>
-                <span>26m ago</span>
+                <span>36m ago</span>
                 <span>Tyler Cowen</span>
             </div>
             <div class="summary-preview">I listened to your recent conversation with Arthur C. Brooks and found myself struggling with his core premise. His framing of happiness seems to reduce it to something like a biological or behavioura</div>
@@ -3346,7 +3400,7 @@
             <a href="https://marginalrevolution.com/marginalrevolution/2026/05/monday-assorted-links-558.html?utm_source=rss&amp;utm_medium=rss&amp;utm_campaign=monday-assorted-links-558" target="_blank" rel="noopener">Monday assorted links</a>
             <div class="meta">
                 <span class="section-tag">Economics+AI</span>
-                <span>13h ago</span>
+                <span>14h ago</span>
                 <span>Tyler Cowen</span>
             </div>
             <div class="summary-preview">1. Ezra Klein on whether AI is likely to lead to mass unemployment (NYT). 2. There is a great Kentucky Derby stagnation. 3. Is open source AI overrated? 4. The deadweight loss of the human capital in </div>
@@ -3398,7 +3452,7 @@
         </div>
         </div>
     </div>
-    <div class="pub-card">
+    <div class="pub-card" data-tier="analysis">
         <div class="pub-header" style="background:#7B2D26;color:#fff">
             Astral Codex Ten
             <span class="count">4 articles</span>
@@ -3443,7 +3497,7 @@
         </div>
         </div>
     </div>
-    <div class="pub-card">
+    <div class="pub-card" data-tier="analysis">
         <div class="pub-header" style="background:#2C3E50;color:#fff">
             LessWrong
             <span class="count">10 articles</span>
@@ -3454,7 +3508,7 @@
             <a href="https://www.lesswrong.com/posts/kBKrMSSZLEE5RWnur/are-you-looking-up" target="_blank" rel="noopener">Are you looking up?</a>
             <div class="meta">
                 <span class="section-tag">Community</span>
-                <span>25m ago</span>
+                <span>34m ago</span>
                 <span>Craig Green</span>
             </div>
             <div class="summary-preview">This is my first post to Less Wrong. I&#x27;m not sure if the moderators will consider it appropriate or not. I share it here for feedback on my writing. Nothing in here is likely to be new to readers of t</div>
@@ -3542,7 +3596,7 @@
         </div>
         </div>
     </div>
-    <div class="pub-card">
+    <div class="pub-card" data-tier="analysis">
         <div class="pub-header" style="background:#1E3A8A;color:#fff">
             Interconnects (Lambert)
             <span class="count">1 articles</span>
@@ -3560,7 +3614,7 @@
         </div>
         </div>
     </div>
-    <div class="pub-card">
+    <div class="pub-card" data-tier="analysis">
         <div class="pub-header" style="background:#6D28D9;color:#fff">
             The Algorithmic Bridge
             <span class="count">4 articles</span>
@@ -3571,7 +3625,7 @@
             <a href="https://www.thealgorithmicbridge.com/p/how-to-get-more-from-ai-by-using" target="_blank" rel="noopener">How to Get More From AI by Using Fewer Tools</a>
             <div class="meta">
                 <span class="section-tag">Commentary</span>
-                <span>8h ago</span>
+                <span>9h ago</span>
                 <span>Alberto Romero</span>
             </div>
             <div class="summary-preview">Don’t fall for the tool sprawl trap</div>
@@ -3605,7 +3659,7 @@
         </div>
         </div>
     </div>
-    <div class="pub-card">
+    <div class="pub-card" data-tier="eu_ro">
         <div class="pub-header" style="background:#FF1A4B;color:#fff">
             Politico Europe
             <span class="count">10 articles</span>
@@ -3616,7 +3670,7 @@
             <a href="https://www.politico.eu/article/top-eu-diplomatic-official-to-leave-brussels/?utm_source=RSS_Feed&amp;utm_medium=RSS&amp;utm_campaign=RSS_Syndication" target="_blank" rel="noopener">Top EU diplomatic official to leave Brussels</a>
             <div class="meta">
                 <span class="section-tag">Tech/Policy</span>
-                <span>45m ago</span>
+                <span>54m ago</span>
                 <span>Gabriel Gavin, Jacopo Barigazzi, Nicholas Vinocur</span>
             </div>
             <div class="summary-preview">Belén Martínez Carbonell will step down from the European External Action Service, diplomats and officials told POLITICO.</div>
@@ -3704,7 +3758,7 @@
         </div>
         </div>
     </div>
-    <div class="pub-card">
+    <div class="pub-card" data-tier="eu_ro">
         <div class="pub-header" style="background:#00B956;color:#fff">
             Electrek
             <span class="count">19 articles</span>
@@ -3715,7 +3769,7 @@
             <a href="https://electrek.co/2026/05/04/1000-curbside-ev-chargers-philadelphia/" target="_blank" rel="noopener">1,000 curbside EV chargers are coming to Philadelphia</a>
             <div class="meta">
                 <span class="section-tag">EV/Mobility</span>
-                <span>6h ago</span>
+                <span>7h ago</span>
                 <span>Michelle Lewis</span>
             </div>
             <div class="summary-preview">Philadelphia is gearing up for a major buildout of curbside EV chargers. more…</div>
@@ -3814,7 +3868,7 @@
             <a href="https://electrek.co/2026/05/04/toyota-changes-tune-haters-anthem-ad-new-evs-video/" target="_blank" rel="noopener">Toyota takes a U-turn in ‘Haters Anthem’ ad to promote its new EVs [Video]</a>
             <div class="meta">
                 <span class="section-tag">EV/Mobility</span>
-                <span>13h ago</span>
+                <span>14h ago</span>
                 <span>Peter Johnson</span>
             </div>
             <div class="summary-preview">Toyota is apparently flipping the script by putting “EV haters” in its new electric SUVs to turn skeptics into believers. more…</div>
@@ -3841,14 +3895,14 @@
             <a href="https://electrek.co/2026/05/04/toyota-unveil-luxury-3-row-lexus-ev-suv-images/" target="_blank" rel="noopener">Toyota is about to reveal an upscale 3-row Lexus electric SUV [Images]</a>
             <div class="meta">
                 <span class="section-tag">EV/Mobility</span>
-                <span>15h ago</span>
+                <span>16h ago</span>
                 <span>Peter Johnson</span>
             </div>
             <div class="summary-preview">Toyota’s luxury Lexus brand will unveil its first three-row electric SUV this week. The higher-end sibling to the Highlander EV was spotted testing for the first time ahead of its debut. more…</div>
         </div>
         </div>
     </div>
-    <div class="pub-card">
+    <div class="pub-card" data-tier="eu_ro">
         <div class="pub-header" style="background:#E94B3C;color:#fff">
             start-up.ro
             <span class="count">12 articles</span>
@@ -3859,7 +3913,7 @@
             <a href="https://start-up.ro/memoriile-ram-ale-telefoanelor-mobile-urmeaza-sa-se-scumpeasca-cu-aproape-100/" target="_blank" rel="noopener">Memoriile RAM ale telefoanelor mobile urmează să se scumpească cu aproape 100%</a>
             <div class="meta">
                 <span class="section-tag">Romania Tech</span>
-                <span>5m ago</span>
+                <span>15m ago</span>
                 <span>start-up.ro</span>
             </div>
             <div class="summary-preview">Prețurile pentru memoria DRAM utilizată în telefoanele mobile sunt pe cale să crească accelerat, iar impactul va fi resimțit direct în costul final al dispozitivelor. Evoluția vine într-un context...</div>
@@ -3868,7 +3922,7 @@
             <a href="https://start-up.ro/samsung-galaxy-s27-ultra-ar-putea-primi-camera-de-200-mp-cu-diafragma-variabila-si-modificari-de-design/" target="_blank" rel="noopener">Samsung Galaxy S27 Ultra ar putea primi cameră de 200 MP cu diafragmă variabilă și modificări de design</a>
             <div class="meta">
                 <span class="section-tag">Romania Tech</span>
-                <span>12m ago</span>
+                <span>21m ago</span>
                 <span>start-up.ro</span>
             </div>
             <div class="summary-preview">Samsung pregătește următoarea generație de telefoane din seria Galaxy S, iar primele informații indică schimbări la nivelul camerei și al designului. Modelul Galaxy S27 Ultra ar putea introduce...</div>
@@ -3877,7 +3931,7 @@
             <a href="https://start-up.ro/un-cv-cu-cinci-participari-la-unbreakable-si-una-la-rocsc-valoreaza-mai-mult-decat-multe-certificari-profesionale/" target="_blank" rel="noopener">&quot;Un CV cu cinci participări la UNbreakable și una la ROCSC valorează mai mult decât multe certificări profesionale&quot;</a>
             <div class="meta">
                 <span class="section-tag">Romania Tech</span>
-                <span>18m ago</span>
+                <span>27m ago</span>
                 <span>start-up.ro</span>
             </div>
             <div class="summary-preview">Acum câțiva ani competițiile de securitate cibernetică pentru liceeni și studenți adunau câteva sute de participanți. 2026 marchează un interes crescut pentru competiții precum Unbreakable,...</div>
@@ -3886,7 +3940,7 @@
             <a href="https://start-up.ro/aso-startup-ul-care-vrea-sa-monitorizeze-spatiul-aerian-transforma-camerele-video-in-solutii-de-detectare-a-dronelor-cu-ai/" target="_blank" rel="noopener">Startup-ul care păzește cerul de drone inamice cu ajutorul camerelor video obișnuite</a>
             <div class="meta">
                 <span class="section-tag">Romania Tech</span>
-                <span>18m ago</span>
+                <span>27m ago</span>
                 <span>start-up.ro</span>
             </div>
             <div class="summary-preview">România a devenit în ultimii ani una dintre țările europene care privesc altfel spațiul aerian de joasă altitudine. Proximitatea războiului din Ucraina și presiunea noilor reguli europene au...</div>
@@ -3895,7 +3949,7 @@
             <a href="https://start-up.ro/samsung-galaxy-z-flip8-ecran-fara-cuta-baterie-de-4-000mah-si-aceleasi-dimensiuni-de-display/" target="_blank" rel="noopener">Samsung Galaxy Z Flip8: ecran fără cută, baterie de 4.000mAh și aceleași dimensiuni de display</a>
             <div class="meta">
                 <span class="section-tag">Romania Tech</span>
-                <span>21m ago</span>
+                <span>31m ago</span>
                 <span>start-up.ro</span>
             </div>
             <div class="summary-preview">Samsung pregătește modificări pentru viitorul Galaxy Z Flip8, model pliabil care ar putea reduce una dintre problemele vizibile ale generațiilor actuale: cuta de pe ecran. Informațiile indică...</div>
@@ -3904,7 +3958,7 @@
             <a href="https://start-up.ro/antreprenori-uniti/" target="_blank" rel="noopener">Antreprenori uniți</a>
             <div class="meta">
                 <span class="section-tag">Romania Tech</span>
-                <span>25m ago</span>
+                <span>35m ago</span>
                 <span>start-up.ro</span>
             </div>
             <div class="summary-preview">Mai țineți minte unde eram acum 6 ani? Mulți dintre voi vreți să uitați asta. Eu îmi amintesc. Era o vreme la fel de frumoasă afară, dar noi eram în casă, se auzeau foarte puține mașini pe străzi,...</div>
@@ -3922,7 +3976,7 @@
             <a href="https://start-up.ro/apollo-ai-technologies-equinox-evolution-si-opticomm-ai-nominalizate-la-start-up-of-the-year-la-premiile-anis-2026/" target="_blank" rel="noopener">Apollo AI Technologies, Equinox Evolution și OptiComm.AI nominalizate la „Startup of the year” la Premiile ANIS 2026</a>
             <div class="meta">
                 <span class="section-tag">Romania Tech</span>
-                <span>19h ago</span>
+                <span>20h ago</span>
                 <span>start-up.ro</span>
             </div>
             <div class="summary-preview">ANIS a anunțat finaliștii ediției 2026 ai Premiilor de Excelență ale industriei ITC, într-un context marcat de competiție ridicată și o orientare către proiecte cu impact măsurabil. La categoria...</div>
@@ -3940,7 +3994,7 @@
             <a href="https://start-up.ro/asociatia-rostartup-pregateste-20-de-milioane-de-euro-pentru-organizatii-care-sustin-startup-urile-tech-din-romania/" target="_blank" rel="noopener">Asociația ROStartup pregătește 20 de milioane de euro pentru organizații care susțin startup-urile tech din România</a>
             <div class="meta">
                 <span class="section-tag">Romania Tech</span>
-                <span>21h ago</span>
+                <span>22h ago</span>
                 <span>start-up.ro</span>
             </div>
             <div class="summary-preview">Asociația ROStartup va avea la dispoziție 20 de milioane de euro printr-un proiect european din programul POCIDIF care se vor duce către incubatoare, acceleratoare și organizații din ecosistem...</div>
@@ -3965,18 +4019,27 @@
         </div>
         </div>
     </div>
-    <div class="pub-card">
+    <div class="pub-card" data-tier="eu_ro">
         <div class="pub-header" style="background:#0E6E2A;color:#fff">
             profit.ro
             <span class="count">10 articles</span>
         </div>
         <div class="article-list">
             
+        <div class="article" data-title="Unitatea 2 a CNE Cernavodă s-a deconectat automat de la rețea luni seara" data-summary="Unitatea 2 a Centralei Nucleare de la Cernavodă s-a deconectat automat de la rețea luni seara, ca urmare a apariției unei disfuncționalități la un separator electric, echipament aflat în partea clasic" data-pub="profit.ro" data-published="2026-05-05T05:20:56+00:00">
+            <a href="https://www.profit.ro/povesti-cu-profit/energie/unitatea-2-a-cne-cernavoda-s-a-deconectat-automat-de-la-retea-luni-seara-22432916?utm_source=Rss&amp;utm_medium=Referral&amp;utm_campaign=Cross" target="_blank" rel="noopener">Unitatea 2 a CNE Cernavodă s-a deconectat automat de la rețea luni seara</a>
+            <div class="meta">
+                <span class="section-tag">Romania Business</span>
+                <span>11m ago</span>
+                
+            </div>
+            <div class="summary-preview">Unitatea 2 a Centralei Nucleare de la Cernavodă s-a deconectat automat de la rețea luni seara, ca urmare a apariției unei disfuncționalități la un separator electric, echipament aflat în partea clasic</div>
+        </div>
         <div class="article" data-title="Power bank pentru telefon și tabletă: ce capacitate merită și ce specificații sunt de fapt importante" data-summary="Power bank-ul este genul de accesoriu pe care mulți îl cumpără fie prea târziu, fie complet greșit." data-pub="profit.ro" data-published="2026-05-05T05:16:00+00:00">
             <a href="https://www.profit.ro/povesti-cu-profit/it-c/power-bank-pentru-telefon-si-tableta-ce-capacitate-merita-si-ce-specificatii-sunt-de-fapt-importante-22432842?utm_source=Rss&amp;utm_medium=Referral&amp;utm_campaign=Cross" target="_blank" rel="noopener">Power bank pentru telefon și tabletă: ce capacitate merită și ce specificații sunt de fapt importante</a>
             <div class="meta">
                 <span class="section-tag">Romania Business</span>
-                <span>7m ago</span>
+                <span>16m ago</span>
                 
             </div>
             <div class="summary-preview">Power bank-ul este genul de accesoriu pe care mulți îl cumpără fie prea târziu, fie complet greșit.</div>
@@ -3985,7 +4048,7 @@
             <a href="https://www.profit.ro/profit-live/video-energia-face-surfing-alexandru-chirila-ceo-profit-point-puneti-mana-si-economisiti-puneti-mana-si-faceti-curatenie-in-buget-pentru-ca-nu-vin-vremuri-usoare-profit-ro-live-tv-pastila-financiara-22432695?utm_source=Rss&amp;utm_medium=Referral&amp;utm_campaign=Cross" target="_blank" rel="noopener">VIDEO Energia face surfing. Alexandru Chirilă, CEO Profit Point: Puneți mâna și economisiți, puneți mâna și faceți curățenie în buget pentru că nu vin vremuri ușoare! – Profit.ro Live TV Pastila Financiară</a>
             <div class="meta">
                 <span class="section-tag">Romania Business</span>
-                <span>23m ago</span>
+                <span>32m ago</span>
                 
             </div>
             <div class="summary-preview">Prețul petrolului revine pe o tendință ascendentă și se apropie de praguri considerate critice pentru economie, cu efecte în lanț asupra inflației, consumului și creșterii economice, explică Alexandru</div>
@@ -3994,7 +4057,7 @@
             <a href="https://www.profit.ro/opinii/opinii-prima-luna-a-noului-guvern-testul-credibilitatii-optimismului-si-profesionalismului-22431629?utm_source=Rss&amp;utm_medium=Referral&amp;utm_campaign=Cross" target="_blank" rel="noopener">Opinii: Prima lună a noului guvern: testul credibilității, optimismului și profesionalismului</a>
             <div class="meta">
                 <span class="section-tag">Romania Business</span>
-                <span>31m ago</span>
+                <span>40m ago</span>
                 
             </div>
             <div class="summary-preview">Indiferent dacă vorbim despre o formare la finalul lunii mai sau, cel târziu, la început de iunie, noul guvern al României va intra direct într-un test de stres.</div>
@@ -4003,7 +4066,7 @@
             <a href="https://www.profit.ro/povesti-cu-profit/auto-transporturi/cea-mai-mare-piata-de-masini-electrice-din-europa-isi-reduce-la-jumatate-prognozele-pentru-urmatorii-cinci-ani-22432558?utm_source=Rss&amp;utm_medium=Referral&amp;utm_campaign=Cross" target="_blank" rel="noopener">Cea mai mare piață de mașini electrice din Europa își reduce la jumătate prognozele pentru următorii cinci ani</a>
             <div class="meta">
                 <span class="section-tag">Romania Business</span>
-                <span>42m ago</span>
+                <span>51m ago</span>
                 
             </div>
             <div class="summary-preview">Vânzările de automobile electrice pe cea mai mare piață auto din Europa, Germania, vor fi mult mai mici decât estimările anterioare. Două analize independente arată că autoritățile au fost mult prea o</div>
@@ -4012,7 +4075,7 @@
             <a href="https://www.profit.ro/povesti-cu-profit/it-c/document-dnsc-anuleaza-o-licitatie-care-urmarea-sporirea-competentelor-in-materie-de-securitate-cibernetica-pentru-1-000-de-autoritati-si-institutii-ale-statului-22423181?utm_source=Rss&amp;utm_medium=Referral&amp;utm_campaign=Cross" target="_blank" rel="noopener">DOCUMENT - DNSC anulează o licitație care urmărea sporirea competențelor în materie de securitate cibernetică pentru 1.000 de autorități și instituții ale statului</a>
             <div class="meta">
                 <span class="section-tag">Romania Business</span>
-                <span>49m ago</span>
+                <span>58m ago</span>
                 
             </div>
             <div class="summary-preview">Directoratul Național de Securitate Cibernetică (DNSC) a anulat o licitație pentru furnizarea de servicii IT necesare unui proiect complex, care vizează &quot;creșterea competențelor în materie de securita</div>
@@ -4053,15 +4116,6 @@
             </div>
             <div class="summary-preview">Cum accesează companiile fonduri europene, Ce trebuie schimbat pentru a accelera accesarea fondurilor UE, Cum pot IMM-urile să acceseze mai ușor finanțările europene, Ce greșeli fac cel mai des aplica</div>
         </div>
-        <div class="article" data-title="Maratonul de Educație Financiară ediția a VIII-a - Cum îți gestionezi veniturile, economiile și datoriile într-un context economic incert? Cum pot deveni investițiile accesibile publicului larg? Cum ne pregătim financiar pentru viitor?" data-summary="Ce ar trebui să știe fiecare tânăr despre bani înainte de a intra în viața adultă?, Cum îți gestionezi veniturile, economiile și datoriile într-un context economic incert?, Cum pot deveni investițiile" data-pub="profit.ro" data-published="2026-05-05T03:01:00+00:00">
-            <a href="https://www.profit.ro/maratoanele-profit-ro/maratonul-educatie-financiara-editia-viii-iti-gestionezi-veniturile-economiile-datoriile-intr-context-economic-incert-pot-deveni-investitiile-accesibile-publicului-larg-ne-pregatim-financiar-viitor-22374241?utm_source=Rss&amp;utm_medium=Referral&amp;utm_campaign=Cross" target="_blank" rel="noopener">Maratonul de Educație Financiară ediția a VIII-a - Cum îți gestionezi veniturile, economiile și datoriile într-un context economic incert? Cum pot deveni investițiile accesibile publicului larg? Cum ne pregătim financiar pentru viitor?</a>
-            <div class="meta">
-                <span class="section-tag">Romania Business</span>
-                <span>2h ago</span>
-                
-            </div>
-            <div class="summary-preview">Ce ar trebui să știe fiecare tânăr despre bani înainte de a intra în viața adultă?, Cum îți gestionezi veniturile, economiile și datoriile într-un context economic incert?, Cum pot deveni investițiile</div>
-        </div>
         </div>
     </div>
         </div>
@@ -4071,7 +4125,7 @@
     </div>
 
     <div class="footer">
-        Generated 08:23 Bucharest | Personal News Dashboard
+        Generated 08:32 Bucharest | Personal News Dashboard
     </div>
 
     <script>
@@ -4080,6 +4134,10 @@
 
     const LOOKBACK_DEFAULT = 48;
     const LOOKBACK_OVERRIDES = {"Harvard Business Review": 168, "Last Week in AI": 240, "MIT Technology Review": 168, "Stratechery": 168, "Import AI": 240, "One Useful Thing (Mollick)": 240, "Latent Space": 240, "Astral Codex Ten": 240, "AI Snake Oil": 336, "The Gradient": 336, "Gary Marcus": 240, "Interconnects (Lambert)": 240, "The Algorithmic Bridge": 240, "Eric Topol \u2014 Ground Truths": 240, "Benedict Evans": 240, "EU AI Act Tracker": 336, "CSET (Georgetown)": 336, "Allen AI (Ai2)": 240, "Apple ML Research": 720, "NVIDIA Research": 336, "Berkeley AI Research": 336, "MIT CSAIL": 240, "MIT News \u2014 AI": 168, "LangChain Changelog": 240, "Replicate": 336};
+
+    // Tier filter state — start with all tiers active
+    const ALL_TIERS = ["macro", "frontier", "analysis", "techpress", "eu_ro", "aggregators", "other"];
+    let activeTiers = new Set(ALL_TIERS);
 
     function getCutoffFor(pub) {
         const hours = LOOKBACK_OVERRIDES[pub] || LOOKBACK_DEFAULT;
@@ -4116,13 +4174,23 @@
             if (show) visibleCount++;
         });
 
-        // Hide publication cards with zero visible articles, update counts
+        // Hide publication cards if their tier is filtered out OR they have zero visible articles
         document.querySelectorAll('.pub-card').forEach(card => {
+            const tier = card.dataset.tier || 'other';
             const visible = card.querySelectorAll('.article:not([style*="display: none"])');
-            card.style.display = visible.length > 0 ? '' : 'none';
+            const tierVisible = activeTiers.has(tier);
+            card.style.display = (tierVisible && visible.length > 0) ? '' : 'none';
             const countEl = card.querySelector('.count');
             if (countEl) countEl.textContent = visible.length + ' articles';
         });
+
+        // Recompute visibleCount AFTER tier filter so header stat is accurate
+        let actualVisible = 0;
+        document.querySelectorAll('.pub-card').forEach(card => {
+            if (card.style.display === 'none') return;
+            actualVisible += card.querySelectorAll('.article:not([style*="display: none"])').length;
+        });
+        visibleCount = actualVisible;
 
         // Update total count in header
         const statsSpans = document.querySelectorAll('.stats span');
@@ -4140,6 +4208,36 @@
         btn.querySelector('.toggle-label').textContent = timeFilterActive ? 'Last 48h' : 'All articles';
         applyFilters();
     }
+
+    function toggleTier(tier) {
+        if (tier === 'all') {
+            // Reset to all tiers active
+            activeTiers = new Set(ALL_TIERS);
+        } else {
+            if (activeTiers.has(tier)) {
+                activeTiers.delete(tier);
+            } else {
+                activeTiers.add(tier);
+            }
+            // If user toggled everything off, reset to all (avoid empty dashboard)
+            if (activeTiers.size === 0) activeTiers = new Set(ALL_TIERS);
+        }
+        // Update pill visual state
+        const allActive = activeTiers.size === ALL_TIERS.length;
+        document.querySelectorAll('.tier-pill').forEach(pill => {
+            const t = pill.dataset.tier;
+            if (t === 'all') {
+                pill.classList.toggle('active', allActive);
+            } else {
+                pill.classList.toggle('active', activeTiers.has(t));
+            }
+        });
+        applyFilters();
+    }
+
+    document.querySelectorAll('.tier-pill').forEach(pill => {
+        pill.addEventListener('click', () => toggleTier(pill.dataset.tier));
+    });
 
     document.getElementById('search').addEventListener('input', applyFilters);
     applyFilters();
