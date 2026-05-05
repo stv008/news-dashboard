@@ -39,7 +39,16 @@ Use this exact structure:
   </div>
 </div>
 
-3. End with:
+3. AFTER each briefing-item, include a sources block listing the articles that informed that section:
+
+<div class=\"briefing-sources\">
+  <a href=\"URL_FROM_LIST_BELOW\">Publication name</a>
+  <a href=\"URL_FROM_LIST_BELOW\">Publication name</a>
+</div>
+
+Use ONLY URLs that appear in the article list provided in the user message. Never fabricate URLs. If you cannot find a relevant URL for a section, omit the sources block entirely.
+
+4. End with:
 <div class=\"briefing-action\">
   <div class=\"briefing-label\">WATCH TODAY</div>
   <ul><li>Action item</li></ul>
@@ -98,6 +107,38 @@ DEFAULT_PUB_WEIGHT = 1
 BRIEFING_LOOKBACK_HOURS = 36  # Articles older than this are stale for a daily brief
 
 
+def validate_briefing_links(html, valid_urls):
+    """Strip any <a href> in the briefing whose URL was not in the digest.
+
+    Defense-in-depth against the LLM fabricating or transposing URLs. Anchors
+    pointing at unknown URLs are unwrapped (text kept, link removed).
+    """
+    import re
+
+    def replace_anchor(m):
+        href = m.group("href").strip()
+        # Decode common HTML entities that may appear in href
+        href_clean = href.replace("&amp;", "&")
+        text = m.group("text")
+        if href_clean in valid_urls or href in valid_urls:
+            # Force target=_blank + rel=noopener for consistency with article cards
+            return f'<a href="{href}" target="_blank" rel="noopener">{text}</a>'
+        # Unwrap: keep inner text, drop the anchor
+        return text
+
+    pattern = re.compile(
+        r'<a\s+[^>]*href=["\'](?P<href>[^"\']+)["\'][^>]*>(?P<text>[^<]*)</a>',
+        re.IGNORECASE,
+    )
+    cleaned = pattern.sub(replace_anchor, html)
+
+    kept = sum(1 for _ in pattern.finditer(cleaned))
+    total = sum(1 for _ in pattern.finditer(html))
+    if total > kept:
+        print(f"  Briefing link validator: stripped {total - kept} hallucinated href(s) of {total}")
+    return cleaned
+
+
 def is_available():
     """Check if Claude API summarization is available."""
     return HAS_ANTHROPIC and os.environ.get("ANTHROPIC_API_KEY")
@@ -117,14 +158,14 @@ def get_top_articles():
         # Top 4 per publication via window function; we'll downsample below.
         cursor = conn.execute("""
             WITH ranked AS (
-                SELECT publication, title, summary, section, published,
+                SELECT publication, title, summary, section, published, link,
                        ROW_NUMBER() OVER (
                            PARTITION BY publication ORDER BY published DESC
                        ) AS rn
                 FROM articles
                 WHERE published > ?
             )
-            SELECT publication, title, summary, section, published
+            SELECT publication, title, summary, section, published, link
             FROM ranked
             WHERE rn <= 4
             ORDER BY publication, published DESC
@@ -158,9 +199,14 @@ def generate_briefing():
     if not articles:
         return None
 
+    # Build digest: include URL so Claude can cite back. Filter out empty links.
+    valid_urls = set()
     lines = []
     for a in articles:
         line = f"[{a['publication']}] {a['title']}"
+        if a.get('link'):
+            line += f"\n  URL: {a['link']}"
+            valid_urls.add(a['link'])
         if a['summary']:
             line += f"\n  {a['summary'][:250]}"
         lines.append(line)
@@ -186,6 +232,8 @@ def generate_briefing():
             print(f"  AI briefing generated (in={usage.input_tokens}, cached={cached}, out={usage.output_tokens})")
         else:
             print("  AI briefing generated successfully")
+        # Strip any href that wasn't in the source digest (anti-hallucination)
+        summary = validate_briefing_links(summary, valid_urls)
         return summary
     except anthropic.AuthenticationError as e:
         print(f"  ERROR: Invalid ANTHROPIC_API_KEY — {e}")

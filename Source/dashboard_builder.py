@@ -330,6 +330,28 @@ TEMPLATE = """<!DOCTYPE html>
             left: 0;
             color: var(--accent);
         }
+        .briefing-sources {
+            margin-top: 10px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px 14px;
+            font-size: 12px;
+        }
+        .briefing-sources a {
+            color: var(--text-muted);
+            text-decoration: none;
+            border-bottom: 1px dashed transparent;
+            transition: color 0.15s, border-color 0.15s;
+        }
+        .briefing-sources a::before {
+            content: "↗ ";
+            opacity: 0.55;
+            margin-right: 2px;
+        }
+        .briefing-sources a:hover {
+            color: var(--accent);
+            border-bottom-color: var(--accent);
+        }
 
         /* Main grid */
         .main { padding: 24px 40px; }
