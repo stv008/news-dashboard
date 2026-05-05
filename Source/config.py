@@ -162,15 +162,8 @@ FEEDS = {
     "Berkeley AI Research": [
         {"url": "https://bair.berkeley.edu/blog/feed.xml", "section": "Blog"},
     ],
-    "arXiv cs.AI": [
-        {"url": "http://export.arxiv.org/rss/cs.AI", "section": "Papers"},
-    ],
-    "arXiv cs.LG": [
-        {"url": "http://export.arxiv.org/rss/cs.LG", "section": "Papers"},
-    ],
-    "arXiv cs.CL": [
-        {"url": "http://export.arxiv.org/rss/cs.CL", "section": "Papers"},
-    ],
+    # REMOVED 2026-05-05: arXiv cs.AI/LG/CL — firehose (1000+ papers/day) drowned signal.
+    # Re-add via topic-keyword filter or curated subset (e.g., Hugging Face Daily Papers).
     "Replicate": [
         {"url": "https://replicate.com/blog/rss", "section": "Blog"},
     ],
@@ -289,9 +282,6 @@ PUB_COLORS = {
     "MIT CSAIL": {"bg": "#A31F34", "text": "#fff"},
     "MIT News — AI": {"bg": "#8A1A2A", "text": "#fff"},
     "Berkeley AI Research": {"bg": "#003262", "text": "#FDB515"},
-    "arXiv cs.AI": {"bg": "#B31B1B", "text": "#fff"},
-    "arXiv cs.LG": {"bg": "#B31B1B", "text": "#fff"},
-    "arXiv cs.CL": {"bg": "#B31B1B", "text": "#fff"},
     "Replicate": {"bg": "#000000", "text": "#fff"},
     "LangChain Changelog": {"bg": "#1C3C3C", "text": "#fff"},
     # AI — Analysis & Strategy
@@ -369,8 +359,8 @@ MAX_ARTICLE_AGE_DAYS = 90       # Prune articles older than this
 
 # === Claude API settings (optional) ===
 CLAUDE_MODEL = "claude-sonnet-4-6"
-MAX_ARTICLES_TO_SUMMARIZE = 30  # Top N articles to send for AI summary
-MAX_BRIEFING_TOKENS = 1500      # Max output tokens for AI briefing
+MAX_ARTICLES_TO_SUMMARIZE = 100 # Cap total articles sent for AI summary
+MAX_BRIEFING_TOKENS = 1800      # Max output tokens for AI briefing
 
 # === Server settings ===
 SERVER_PORT = 8080
