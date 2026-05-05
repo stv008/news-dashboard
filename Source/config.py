@@ -410,8 +410,9 @@ MAX_ARTICLE_AGE_DAYS = 90       # Prune articles older than this
 # === Claude API settings (optional) ===
 CLAUDE_MODEL = "claude-sonnet-4-6"
 MAX_ARTICLES_TO_SUMMARIZE = 100 # Cap total articles sent for AI summary
-MAX_BRIEFING_TOKENS = 2400      # Max output tokens for AI briefing
-                                # (briefings densely cite + 4-6 sections need headroom)
+MAX_BRIEFING_TOKENS = 3200      # Max output tokens for AI briefing
+                                # 4-6 sections + per-section <a href> sources block
+                                # need ~3K to render without truncation
 
 # === Server settings ===
 SERVER_PORT = 8080
