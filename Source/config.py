@@ -364,6 +364,7 @@ LOOKBACK_HOURS = 48             # How many hours back to look for articles
 # Per-publication overrides. Some publications (HBR, weekly newsletters) don't
 # publish often enough for the global 48h window — extend their lookback.
 LOOKBACK_OVERRIDES = {
+    "The Economist": 168,                   # 1 week (weekly edition, mid-week publish)
     "Harvard Business Review": 168,         # 1 week
     "Last Week in AI": 240,                 # 10 days (weekly newsletter)
     "MIT Technology Review": 168,           # 1 week
