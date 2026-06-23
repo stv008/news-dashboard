@@ -240,6 +240,110 @@ FEEDS = {
     ],
     # BROKEN 2026-05-05: Euractiv, OECD AI, Brookings AI, Automotive News, The Drive
     #                    — RSS endpoints return 403/404 or non-RSS content.
+
+    # === Emerging Markets — Business & AI (Tier 6) ===
+    # Added 2026-06-23. All RSS endpoints verified live. Reputable regional
+    # business/tech sources across China, India, Brazil, Poland, Germany,
+    # Middle East, Indonesia, Singapore, Taiwan, Japan, South Korea, Hong Kong.
+    # China
+    "SCMP — Tech": [
+        {"url": "https://www.scmp.com/rss/318208/feed", "section": "Tech"},
+    ],
+    "TechNode": [
+        {"url": "https://technode.com/feed/", "section": "China Tech"},
+    ],
+    "Pandaily": [
+        {"url": "https://pandaily.com/feed/", "section": "China AI"},
+    ],
+    # Hong Kong
+    "Hong Kong Free Press": [
+        {"url": "https://hongkongfp.com/feed/", "section": "Hong Kong"},
+    ],
+    "Asia Times": [
+        {"url": "https://asiatimes.com/feed/", "section": "Geopolitics"},
+    ],
+    # India
+    "Livemint — Tech": [
+        {"url": "https://www.livemint.com/rss/technology", "section": "Technology"},
+    ],
+    "Inc42": [
+        {"url": "https://inc42.com/feed/", "section": "Startups"},
+    ],
+    "YourStory": [
+        {"url": "https://yourstory.com/feed", "section": "Startups"},
+    ],
+    # Brazil
+    "Brazil Journal": [
+        {"url": "https://braziljournal.com/feed/", "section": "Business"},
+    ],
+    "Startups Brasil": [
+        {"url": "https://www.startups.com.br/feed/", "section": "Startups"},
+    ],
+    # Poland
+    "Notes from Poland": [
+        {"url": "https://notesfrompoland.com/feed/", "section": "Poland"},
+    ],
+    "300Gospodarka": [
+        {"url": "https://300gospodarka.pl/feed", "section": "Economy"},
+    ],
+    "Rzeczpospolita": [
+        {"url": "https://www.rp.pl/rss/1019", "section": "Business"},
+    ],
+    # Germany
+    "Der Spiegel — International": [
+        {"url": "https://www.spiegel.de/international/index.rss", "section": "International"},
+    ],
+    "Heise online": [
+        {"url": "https://www.heise.de/rss/heise-atom.xml", "section": "Tech"},
+    ],
+    "t3n": [
+        {"url": "https://t3n.de/rss.xml", "section": "Digital"},
+    ],
+    "Handelsblatt": [
+        {"url": "https://www.handelsblatt.com/contentexport/feed/schlagzeilen", "section": "Business"},
+    ],
+    # Middle East
+    "Al Jazeera": [
+        {"url": "https://www.aljazeera.com/xml/rss/all.xml", "section": "Middle East"},
+    ],
+    "Wamda": [
+        {"url": "https://www.wamda.com/feed", "section": "MENA Startups"},
+    ],
+    "Arab News": [
+        {"url": "https://www.arabnews.com/rss.xml", "section": "Gulf Business"},
+    ],
+    # Indonesia
+    "Antara News": [
+        {"url": "https://en.antaranews.com/rss/news.xml", "section": "Indonesia"},
+    ],
+    "Tech in Asia": [
+        {"url": "https://www.techinasia.com/feed", "section": "SEA Tech"},
+    ],
+    # Singapore
+    "Channel NewsAsia": [
+        {"url": "https://www.channelnewsasia.com/api/v1/rss-outbound-feed?_format=xml", "section": "Singapore"},
+    ],
+    "Straits Times — Business": [
+        {"url": "https://www.straitstimes.com/news/business/rss.xml", "section": "Business"},
+    ],
+    # Taiwan
+    "DigiTimes": [
+        {"url": "https://www.digitimes.com/rss/daily.xml", "section": "Semiconductors"},
+    ],
+    "Taipei Times": [
+        {"url": "https://www.taipeitimes.com/xml/index.rss", "section": "Taiwan"},
+    ],
+    # Japan
+    "The Japan Times": [
+        {"url": "https://www.japantimes.co.jp/feed/", "section": "Japan"},
+    ],
+    # South Korea
+    "Korea Times — Tech": [
+        {"url": "https://www.koreatimes.co.kr/www/rss/tech.xml", "section": "Tech"},
+    ],
+    "TheElec": [
+        {"url": "http://www.thelec.kr/rss/allArticle.xml", "section": "Semiconductors"},
+    ],
 }
 
 # === Publication display order and colors ===
@@ -306,6 +410,46 @@ PUB_COLORS = {
     "Electrek": {"bg": "#00B956", "text": "#fff"},
     "start-up.ro": {"bg": "#E94B3C", "text": "#fff"},
     "profit.ro": {"bg": "#0E6E2A", "text": "#fff"},
+    # Emerging Markets — China / HK
+    "SCMP — Tech": {"bg": "#FFCA05", "text": "#1A1A1A"},
+    "TechNode": {"bg": "#00A8A8", "text": "#fff"},
+    "Pandaily": {"bg": "#2D2D2D", "text": "#fff"},
+    "Hong Kong Free Press": {"bg": "#E4002B", "text": "#fff"},
+    "Asia Times": {"bg": "#A8232C", "text": "#fff"},
+    # Emerging Markets — India
+    "Livemint — Tech": {"bg": "#0B7FBF", "text": "#fff"},
+    "Inc42": {"bg": "#1BB394", "text": "#fff"},
+    "YourStory": {"bg": "#ED1C24", "text": "#fff"},
+    # Emerging Markets — Brazil
+    "Brazil Journal": {"bg": "#009C3B", "text": "#fff"},
+    "Startups Brasil": {"bg": "#FF5C00", "text": "#fff"},
+    # Emerging Markets — Poland
+    "Notes from Poland": {"bg": "#DC143C", "text": "#fff"},
+    "300Gospodarka": {"bg": "#B01C2E", "text": "#fff"},
+    "Rzeczpospolita": {"bg": "#7A1420", "text": "#fff"},
+    # Emerging Markets — Germany
+    "Der Spiegel — International": {"bg": "#E64415", "text": "#fff"},
+    "Heise online": {"bg": "#BD1421", "text": "#fff"},
+    "t3n": {"bg": "#149EE7", "text": "#fff"},
+    "Handelsblatt": {"bg": "#FF8000", "text": "#fff"},
+    # Emerging Markets — Middle East
+    "Al Jazeera": {"bg": "#E8B500", "text": "#1A1A1A"},
+    "Wamda": {"bg": "#00AEEF", "text": "#fff"},
+    "Arab News": {"bg": "#00573F", "text": "#fff"},
+    # Emerging Markets — Indonesia
+    "Antara News": {"bg": "#C8102E", "text": "#fff"},
+    "Tech in Asia": {"bg": "#EE2A24", "text": "#fff"},
+    # Emerging Markets — Singapore
+    "Channel NewsAsia": {"bg": "#D4202A", "text": "#fff"},
+    "Straits Times — Business": {"bg": "#00407A", "text": "#fff"},
+    # Emerging Markets — Taiwan
+    "DigiTimes": {"bg": "#003B71", "text": "#fff"},
+    "Taipei Times": {"bg": "#1C5E3A", "text": "#fff"},
+    # Emerging Markets — Japan
+    "The Japan Times": {"bg": "#00305C", "text": "#fff"},
+    # Emerging Markets — South Korea
+    "Korea Times — Tech": {"bg": "#003A70", "text": "#fff"},
+    "TheElec": {"bg": "#0F4C81", "text": "#fff"},
 }
 
 # === Tier classification (used for dashboard filter pills) ===
@@ -344,16 +488,32 @@ PUB_TIERS = {
     "Politico Europe": "eu_ro", "EU AI Act Tracker": "eu_ro",
     "CSET (Georgetown)": "eu_ro", "Electrek": "eu_ro",
     "start-up.ro": "eu_ro", "profit.ro": "eu_ro",
+    # Emerging Markets (China, India, Brazil, Poland, Germany, Middle East,
+    # Indonesia, Singapore, Taiwan, Japan, South Korea, Hong Kong)
+    "SCMP — Tech": "emkt", "TechNode": "emkt", "Pandaily": "emkt",
+    "Hong Kong Free Press": "emkt", "Asia Times": "emkt",
+    "Livemint — Tech": "emkt", "Inc42": "emkt", "YourStory": "emkt",
+    "Brazil Journal": "emkt", "Startups Brasil": "emkt",
+    "Notes from Poland": "emkt", "300Gospodarka": "emkt", "Rzeczpospolita": "emkt",
+    "Der Spiegel — International": "emkt", "Heise online": "emkt",
+    "t3n": "emkt", "Handelsblatt": "emkt",
+    "Al Jazeera": "emkt", "Wamda": "emkt", "Arab News": "emkt",
+    "Antara News": "emkt", "Tech in Asia": "emkt",
+    "Channel NewsAsia": "emkt", "Straits Times — Business": "emkt",
+    "DigiTimes": "emkt", "Taipei Times": "emkt",
+    "The Japan Times": "emkt",
+    "Korea Times — Tech": "emkt", "TheElec": "emkt",
 }
 
 # Display order and human labels for the tier filter pills.
-TIER_ORDER = ["macro", "frontier", "analysis", "techpress", "eu_ro", "aggregators"]
+TIER_ORDER = ["macro", "frontier", "analysis", "techpress", "eu_ro", "emkt", "aggregators"]
 TIER_LABELS = {
     "macro": "Macro & Business",
     "frontier": "Frontier Labs",
     "analysis": "Analysis",
     "techpress": "Tech Press",
     "eu_ro": "EU & Romania",
+    "emkt": "Emerging Markets",
     "aggregators": "Aggregators",
     "other": "Other",
 }
@@ -392,6 +552,12 @@ LOOKBACK_OVERRIDES = {
     "MIT News — AI": 168,                   # weekly
     "LangChain Changelog": 240,             # weekly product cadence
     "Replicate": 336,                       # ~weekly to bi-weekly
+    # Emerging Markets — startup/regional outlets that publish less often
+    "Wamda": 168,                           # MENA startup news, ~weekly cadence
+    "Notes from Poland": 120,               # 5 days
+    "Startups Brasil": 120,                 # 5 days
+    "Pandaily": 120,                        # 5 days
+    "Brazil Journal": 96,                   # 4 days
 }
 
 MAX_ARTICLES_PER_PUB = 15       # Maximum articles per publication on dashboard
