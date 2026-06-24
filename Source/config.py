@@ -559,7 +559,7 @@ LOOKBACK_OVERRIDES = {
     "Startups Brasil": 120,                 # 5 days
     "Pandaily": 120,                        # 5 days
     "Brazil Journal": 96,                   # 4 days
-    "Der Spiegel — International": 168,      # English edition publishes a few/day
+    "Der Spiegel — International": 336,      # English edition is curated, ~weekly cadence
     "Korea Times — Tech": 168,              # tech section, lower cadence
 }
 
