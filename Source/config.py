@@ -590,6 +590,10 @@ PUB_LANGUAGES = {
     "Rzeczpospolita": "Polish",
     "Brazil Journal": "Portuguese",
     "Startups Brasil": "Portuguese",
+    "TheElec": "Korean",
+    # Note: Korea Times, SCMP, TechNode, Pandaily, Asia Times, Antara (EN edition),
+    # Tech in Asia, CNA, Straits Times, DigiTimes, Taipei Times, Japan Times all
+    # publish in English — no translation needed.
 }
 TRANSLATE_MODEL = "claude-haiku-4-5"   # cheap/fast model for bulk translation
 TRANSLATE_BATCH_SIZE = 20              # articles per Claude call

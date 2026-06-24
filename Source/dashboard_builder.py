@@ -741,6 +741,11 @@ def format_time(iso_str):
         dt = datetime.fromisoformat(iso_str)
         now = datetime.now(timezone.utc)
         diff = now - dt
+        # Some feeds (e.g. TheElec) emit local timestamps without a timezone,
+        # which parse as several hours in the future. Show those as "just now"
+        # instead of a nonsensical negative "-435m ago".
+        if diff.total_seconds() < 0:
+            return "just now"
         hours = diff.total_seconds() / 3600
         if hours < 1:
             return f"{int(diff.total_seconds() / 60)}m ago"
