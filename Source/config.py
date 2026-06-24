@@ -309,9 +309,11 @@ FEEDS = {
     "Wamda": [
         {"url": "https://www.wamda.com/feed", "section": "MENA Startups"},
     ],
-    "Arab News": [
-        {"url": "https://www.arabnews.com/rss.xml", "section": "Gulf Business"},
-    ],
+    # REMOVED 2026-06-23: Arab News — RSS valid but returns HTTP 403 from
+    # GitHub Actions runner IPs (Cloudflare). Works from residential IPs only.
+    # "Arab News": [
+    #     {"url": "https://www.arabnews.com/rss.xml", "section": "Gulf Business"},
+    # ],
     # Indonesia
     "Antara News": [
         {"url": "https://en.antaranews.com/rss/news.xml", "section": "Indonesia"},
@@ -435,7 +437,6 @@ PUB_COLORS = {
     # Emerging Markets — Middle East
     "Al Jazeera": {"bg": "#E8B500", "text": "#1A1A1A"},
     "Wamda": {"bg": "#00AEEF", "text": "#fff"},
-    "Arab News": {"bg": "#00573F", "text": "#fff"},
     # Emerging Markets — Indonesia
     "Antara News": {"bg": "#C8102E", "text": "#fff"},
     "Tech in Asia": {"bg": "#EE2A24", "text": "#fff"},
@@ -497,7 +498,7 @@ PUB_TIERS = {
     "Notes from Poland": "emkt", "300Gospodarka": "emkt", "Rzeczpospolita": "emkt",
     "Der Spiegel — International": "emkt", "Heise online": "emkt",
     "t3n": "emkt", "Handelsblatt": "emkt",
-    "Al Jazeera": "emkt", "Wamda": "emkt", "Arab News": "emkt",
+    "Al Jazeera": "emkt", "Wamda": "emkt",
     "Antara News": "emkt", "Tech in Asia": "emkt",
     "Channel NewsAsia": "emkt", "Straits Times — Business": "emkt",
     "DigiTimes": "emkt", "Taipei Times": "emkt",
@@ -558,6 +559,8 @@ LOOKBACK_OVERRIDES = {
     "Startups Brasil": 120,                 # 5 days
     "Pandaily": 120,                        # 5 days
     "Brazil Journal": 96,                   # 4 days
+    "Der Spiegel — International": 168,      # English edition publishes a few/day
+    "Korea Times — Tech": 168,              # tech section, lower cadence
 }
 
 MAX_ARTICLES_PER_PUB = 15       # Maximum articles per publication on dashboard
