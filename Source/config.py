@@ -577,6 +577,24 @@ USER_AGENT = (
 # === Database maintenance ===
 MAX_ARTICLE_AGE_DAYS = 90       # Prune articles older than this
 
+# === Translation settings (optional) ===
+# Publications that publish in a language other than English. Their article
+# titles + summaries are translated to English (via Claude Haiku) at build time;
+# the original text is preserved in the title_original/summary_original columns.
+# Publications NOT listed here are assumed to already be in English.
+PUB_LANGUAGES = {
+    "Heise online": "German",
+    "t3n": "German",
+    "Handelsblatt": "German",
+    "300Gospodarka": "Polish",
+    "Rzeczpospolita": "Polish",
+    "Brazil Journal": "Portuguese",
+    "Startups Brasil": "Portuguese",
+}
+TRANSLATE_MODEL = "claude-haiku-4-5"   # cheap/fast model for bulk translation
+TRANSLATE_BATCH_SIZE = 20              # articles per Claude call
+TRANSLATE_MAX_TOKENS = 4096           # output cap per batch
+
 # === Claude API settings (optional) ===
 CLAUDE_MODEL = "claude-sonnet-4-6"
 MAX_ARTICLES_TO_SUMMARIZE = 100 # Cap total articles sent for AI summary

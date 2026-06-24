@@ -18,6 +18,7 @@ os.chdir(os.path.dirname(os.path.abspath(__file__)))
 from fetcher import fetch_all
 from dashboard_builder import build_dashboard
 from summarizer import generate_briefing, is_available
+from translator import translate_new_articles
 
 
 def main():
@@ -33,30 +34,35 @@ def main():
 
     # Step 1: Fetch articles
     if not skip_fetch:
-        print("[1/3] Fetching articles from RSS feeds...")
+        print("[1/4] Fetching articles from RSS feeds...")
         fetch_all()
         print()
     else:
-        print("[1/3] Skipping fetch (using existing data)")
+        print("[1/4] Skipping fetch (using existing data)")
         print()
 
     if fetch_only:
         print("Done (fetch only mode)")
         return
 
-    # Step 2: AI summary (optional)
+    # Step 2: Translate foreign-language articles to English (optional)
+    print("[2/4] Translating foreign-language articles...")
+    translate_new_articles()
+    print()
+
+    # Step 3: AI summary (optional)
     ai_summary = None
     if is_available():
-        print("[2/3] Generating AI briefing...")
+        print("[3/4] Generating AI briefing...")
         ai_summary = generate_briefing()
         print()
     else:
-        print("[2/3] AI briefing skipped (no API key)")
+        print("[3/4] AI briefing skipped (no API key)")
         print("  To enable: pip install anthropic && export ANTHROPIC_API_KEY=sk-ant-...")
         print()
 
-    # Step 3: Build dashboard
-    print("[3/3] Building dashboard...")
+    # Step 4: Build dashboard
+    print("[4/4] Building dashboard...")
     output = build_dashboard(ai_summary)
     print()
 

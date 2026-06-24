@@ -14,7 +14,7 @@ from zoneinfo import ZoneInfo
 DISPLAY_TZ = ZoneInfo("Europe/Bucharest")
 from config import (
     DB_PATH, OUTPUT_HTML, MAX_ARTICLES_PER_PUB, LOOKBACK_HOURS, LOOKBACK_OVERRIDES,
-    PUB_COLORS, PUB_TIERS, TIER_ORDER, TIER_LABELS,
+    PUB_COLORS, PUB_TIERS, TIER_ORDER, TIER_LABELS, PUB_LANGUAGES,
 )
 
 
@@ -424,6 +424,15 @@ TEMPLATE = """<!DOCTYPE html>
             background: var(--surface2);
             color: var(--text-muted);
         }
+        .translated-tag {
+            font-size: 10px;
+            padding: 1px 6px;
+            border-radius: 4px;
+            background: var(--surface2);
+            color: var(--text-muted);
+            opacity: 0.75;
+            cursor: help;
+        }
 
         /* Empty state */
         .empty-state {
@@ -753,6 +762,15 @@ def build_publication_card(pub_name, articles):
         time_str = format_time(a['published'])
         section = esc(a.get('section', ''))
         section_tag = f'<span class="section-tag">{section}</span>' if section else ''
+        # Show a hint when the title/summary were machine-translated to English.
+        translated_tag = ''
+        if a.get('title_original'):
+            lang = esc(PUB_LANGUAGES.get(pub_name, ''))
+            label = f'translated from {lang}' if lang else 'translated'
+            translated_tag = (
+                f'<span class="translated-tag" '
+                f'title="{esc(a.get("title_original", ""))}">🌐 {label}</span>'
+            )
         summary_text = esc(a.get('summary', '')[:200])
         title = esc(a.get('title', ''))
         link = esc(a.get('link', ''))
@@ -764,6 +782,7 @@ def build_publication_card(pub_name, articles):
             <a href="{link}" target="_blank" rel="noopener">{title}</a>
             <div class="meta">
                 {section_tag}
+                {translated_tag}
                 <span>{time_str}</span>
                 {'<span>' + author + '</span>' if author else ''}
             </div>
