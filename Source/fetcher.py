@@ -11,11 +11,12 @@ import html
 import re
 import urllib.request
 import urllib.error
+from urllib.parse import urljoin
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timedelta, timezone
 from config import (
-    FEEDS, LOOKBACK_HOURS, LOOKBACK_OVERRIDES, DB_PATH, USER_AGENT,
-    FETCH_TIMEOUT_SECONDS, FETCH_DELAY_SECONDS, MAX_SUMMARY_LENGTH,
+    FEEDS, LOOKBACK_HOURS, LOOKBACK_OVERRIDES, LINK_BASE_OVERRIDES, DB_PATH,
+    USER_AGENT, FETCH_TIMEOUT_SECONDS, FETCH_DELAY_SECONDS, MAX_SUMMARY_LENGTH,
     MAX_ARTICLE_AGE_DAYS, MAX_FETCH_RETRIES,
 )
 
@@ -135,6 +136,11 @@ def fetch_feed(pub_name, feed_info):
             if not title:
                 continue
             link = entry.get('link', '')
+            if link and not link.startswith(('http://', 'https://')):
+                # Relative link with no xml:base to resolve against (e.g. HBR's
+                # feed) — fall back to a configured site root, else the feed's
+                # own URL (correct per Atom spec when the feed does set a base).
+                link = urljoin(LINK_BASE_OVERRIDES.get(pub_name, url), link)
             summary = clean_html(entry.get('summary', entry.get('description', '')))
             author = entry.get('author', '')
             published = parse_date(entry)

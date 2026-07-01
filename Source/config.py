@@ -563,6 +563,15 @@ LOOKBACK_OVERRIDES = {
     "Korea Times — Tech": 168,              # tech section, lower cadence
 }
 
+# Some feeds emit entry links as relative paths with no usable base to resolve
+# them against (no xml:base, and the feed's own rel="self" link is broken —
+# HBR's atom feed literally returns "site.hostname/..." unsubstituted). For
+# those publications, hardcode the real site root so fetcher.py can urljoin
+# the relative path into a working absolute URL.
+LINK_BASE_OVERRIDES = {
+    "Harvard Business Review": "https://hbr.org",
+}
+
 MAX_ARTICLES_PER_PUB = 15       # Maximum articles per publication on dashboard
 FETCH_TIMEOUT_SECONDS = 15      # HTTP request timeout per feed
 FETCH_DELAY_SECONDS = 0.5       # Politeness delay between feed requests
