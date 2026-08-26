@@ -93,6 +93,8 @@ def _translate_batch(client, batch):
         }],
         messages=[{"role": "user", "content": user_msg}],
     )
+    if getattr(response, "stop_reason", None) == "max_tokens":
+        raise ValueError(f"response truncated at TRANSLATE_MAX_TOKENS={TRANSLATE_MAX_TOKENS}")
     raw = response.content[0].text.strip()
     # Be tolerant of stray fences or prose around the JSON array.
     start = raw.find("[")
@@ -105,6 +107,30 @@ def _translate_batch(client, batch):
         for item in parsed
         if isinstance(item, dict) and "id" in item
     }
+
+
+def _translate_with_retry(client, batch):
+    """Translate a batch, halving it on malformed output instead of losing it.
+
+    A 20-article batch can overflow TRANSLATE_MAX_TOKENS, which truncates the
+    JSON array mid-element; smaller halves fit and parse cleanly. Genuine API
+    errors (billing, auth, rate limit) are re-raised untouched — splitting a
+    batch cannot fix those and would just multiply the failing calls.
+    """
+    try:
+        return _translate_batch(client, batch)
+    except anthropic.APIStatusError:
+        raise
+    except (ValueError, json.JSONDecodeError) as e:
+        if len(batch) == 1:
+            print(f"  Warning: translation failed for 1 article: {e}")
+            return {}
+        mid = len(batch) // 2
+        print(f"  Note: batch of {len(batch)} unparseable ({e}) — "
+              f"retrying as {mid} + {len(batch) - mid}")
+        results = _translate_with_retry(client, batch[:mid])
+        results.update(_translate_with_retry(client, batch[mid:]))
+        return results
 
 
 def _apply_translation(conn, article_id, en_title, en_summary):
@@ -159,9 +185,11 @@ def translate_new_articles():
         for i in range(0, len(pending), TRANSLATE_BATCH_SIZE):
             batch = pending[i:i + TRANSLATE_BATCH_SIZE]
             try:
-                results = _translate_batch(client, batch)
-            except anthropic.AuthenticationError as e:
-                print(f"  ERROR: Invalid ANTHROPIC_API_KEY — {e}")
+                results = _translate_with_retry(client, batch)
+            except anthropic.APIStatusError as e:
+                # Billing, auth, rate limit: every remaining batch would fail
+                # the same way, so stop instead of spamming the log.
+                print(f"  ERROR: Anthropic API error, aborting translation — {e}")
                 break
             except Exception as e:
                 print(f"  Warning: translation batch failed ({len(batch)} articles): {e}")
@@ -180,6 +208,10 @@ def translate_new_articles():
             by_lang[lang] = by_lang.get(lang, 0) + 1
         breakdown = ", ".join(f"{k}: {v}" for k, v in sorted(by_lang.items()))
         print(f"  Translated {translated}/{len(pending)} articles to English ({breakdown})")
+        if translated < len(pending):
+            print(f"::warning title=Translation incomplete::"
+                  f"{len(pending) - translated} of {len(pending)} articles were "
+                  f"left in their source language")
         return translated
 
 

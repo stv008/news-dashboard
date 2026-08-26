@@ -52,9 +52,15 @@ def main():
 
     # Step 3: AI summary (optional)
     ai_summary = None
+    briefing_failed = False
     if is_available():
         print("[3/4] Generating AI briefing...")
         ai_summary = generate_briefing()
+        # A configured key that produces no briefing is a real failure, not a
+        # skip. Record it and keep going so today's articles still deploy;
+        # main() exits 3 at the end so CI turns red instead of silently
+        # publishing a dashboard with no briefing.
+        briefing_failed = not ai_summary
         print()
     else:
         print("[3/4] AI briefing skipped (no API key)")
@@ -70,6 +76,12 @@ def main():
     print(f"  Dashboard ready: {os.path.abspath(output)}")
     print(f"  Open in your browser to view")
     print("=" * 50)
+
+    if briefing_failed:
+        print()
+        print("ERROR: dashboard was built WITHOUT an AI briefing "
+              "(API key is set but the call produced nothing).")
+        sys.exit(3)
 
 
 if __name__ == "__main__":

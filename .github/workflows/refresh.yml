@@ -24,9 +24,18 @@ jobs:
         run: pip install feedparser anthropic
 
       - name: Build dashboard
+        id: build
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-        run: python Source/run.py
+        run: |
+          set +e
+          python Source/run.py
+          code=$?
+          echo "exit_code=$code" >> "$GITHUB_OUTPUT"
+          # Exit 3 = dashboard built fine but the AI briefing failed. Let the
+          # deploy proceed so today's articles still ship, then fail the run
+          # in the final step. Any other non-zero code is fatal here.
+          if [ "$code" -ne 0 ] && [ "$code" -ne 3 ]; then exit "$code"; fi
 
       - name: Prepare index.html for Pages
         run: cp Output/dashboard.html Output/index.html
@@ -39,3 +48,9 @@ jobs:
           publish_dir: ./Output
           publish_branch: gh-pages
           commit_message: 'chore: refresh dashboard [run ${{ github.run_number }}]'
+
+      - name: Fail if the AI briefing is missing
+        if: steps.build.outputs.exit_code == '3'
+        run: |
+          echo "::error title=AI briefing missing::Dashboard deployed, but the AI briefing failed to generate. Check the ANTHROPIC_API_KEY secret and the account's credit balance."
+          exit 1
