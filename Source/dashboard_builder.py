@@ -8,6 +8,7 @@ import sqlite3
 import re
 import json
 import html as html_mod
+from html.parser import HTMLParser
 from datetime import datetime, timezone
 from zoneinfo import ZoneInfo
 
@@ -25,20 +26,80 @@ def esc(text):
     return html_mod.escape(str(text), quote=True)
 
 
+def safe_url(url):
+    """Return url only if it is http(s); anything else (javascript:, data:) becomes ''."""
+    url = (url or "").strip()
+    return url if re.match(r"^https?://", url, re.IGNORECASE) else ""
+
+
+class _AllowlistSanitizer(HTMLParser):
+    """Rebuild HTML keeping only the tags/attributes the briefing uses.
+
+    Allowlist, not blocklist: unknown tags are dropped (their text kept and
+    escaped), unknown attributes are dropped, links must be http(s), and the
+    contents of script/style-like elements are discarded entirely.
+    """
+    ALLOWED = {
+        "p": {"class"}, "div": {"class", "data-priority"}, "span": {"class"},
+        "a": {"href", "target", "rel"}, "strong": set(), "em": set(),
+    }
+    DROP_CONTENT = {"script", "style", "iframe", "object", "embed", "template", "noscript", "svg", "math"}
+
+    def __init__(self):
+        super().__init__(convert_charrefs=True)
+        self.out, self.stack, self.skip = [], [], 0
+
+    def handle_starttag(self, tag, attrs):
+        if tag in self.DROP_CONTENT:
+            self.skip += 1
+            return
+        if self.skip or tag not in self.ALLOWED:
+            return
+        kept = []
+        for name, value in attrs:
+            if name not in self.ALLOWED[tag] or value is None:
+                continue
+            if name == "href":
+                value = safe_url(value)
+                if not value:
+                    continue
+            if name == "target":
+                value = "_blank"
+            if name == "rel":
+                value = "noopener"
+            kept.append(f' {name}="{html_mod.escape(value, quote=True)}"')
+        self.out.append(f"<{tag}{''.join(kept)}>")
+        self.stack.append(tag)
+
+    def handle_endtag(self, tag):
+        if tag in self.DROP_CONTENT:
+            self.skip = max(0, self.skip - 1)
+            return
+        if self.skip or tag not in self.stack:
+            return
+        while self.stack:                      # close any unclosed children too
+            t = self.stack.pop()
+            self.out.append(f"</{t}>")
+            if t == tag:
+                break
+
+    def handle_data(self, data):
+        if not self.skip:
+            self.out.append(html_mod.escape(data, quote=False))
+
+    def result(self):
+        self.close()
+        return "".join(self.out) + "".join(f"</{t}>" for t in reversed(self.stack))
+
+
 def sanitize_ai_html(raw_html):
-    """Strip dangerous tags and event handlers from AI-generated HTML."""
+    """Allowlist-sanitize the AI briefing HTML (defence in depth; the summarizer
+    already renders escaped HTML itself)."""
     if not raw_html:
         return raw_html
-    # Remove dangerous block-level elements entirely (with their content)
-    raw_html = re.sub(
-        r'<(script|iframe|object|embed|form|style)[^>]*>.*?</\1>',
-        '', raw_html, flags=re.DOTALL | re.IGNORECASE
-    )
-    # Strip inline event handlers (onclick=, onload=, etc.)
-    raw_html = re.sub(r'\s+on\w+\s*=\s*(?:"[^"]*"|\'[^\']*\')', '', raw_html, flags=re.IGNORECASE)
-    # Strip javascript: URIs in href/src
-    raw_html = re.sub(r'(href|src)\s*=\s*["\']javascript:[^"\']*["\']', '', raw_html, flags=re.IGNORECASE)
-    return raw_html
+    parser = _AllowlistSanitizer()
+    parser.feed(raw_html)
+    return parser.result()
 
 
 TEMPLATE = """<!DOCTYPE html>
@@ -364,7 +425,7 @@ TEMPLATE = """<!DOCTYPE html>
             cursor: pointer;
         }
         .article:last-child { border-bottom: none; }
-        .article:hover { background: var(--surface2); }
+        @media (hover: hover) { .article:hover { background: var(--surface2); } }
         .article a {
             text-decoration: none;
             color: var(--text);
@@ -428,7 +489,10 @@ TEMPLATE = """<!DOCTYPE html>
 
         /* Responsive */
         html { -webkit-text-size-adjust: 100%; }
-        .briefing-headline, .article a { overflow-wrap: anywhere; }
+        .briefing-headline, .briefing-detail, .briefing-sources a, .article a { overflow-wrap: anywhere; }
+        .briefing-content, .pub-grid > * { min-width: 0; }
+        :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+        .search-bar input:focus-visible { outline: none; }  /* border-color already marks focus */
         @media (max-width: 768px) {
             .header, .main, .search-bar { padding-left: 16px; padding-right: 16px; }
             .header {
@@ -442,21 +506,26 @@ TEMPLATE = """<!DOCTYPE html>
             .header .date { font-size: 13px; }
             .header .right-section { justify-content: space-between; gap: 12px; }
             .header .stats { gap: 14px; }
-            .refresh-btn { min-height: 40px; }
+            .refresh-btn { min-height: 44px; }
             .search-bar { padding-top: 12px; padding-bottom: 12px; }
             .search-row { gap: 8px; }
-            .search-bar input { font-size: 16px; padding: 10px 14px; min-width: 0; }  /* 16px stops iOS zoom-on-focus */
-            .time-toggle { padding: 10px 12px; min-height: 42px; }
+            .search-bar input { font-size: 16px; padding: 10px 14px; min-width: 0; flex: 1 1 auto; }  /* 16px stops iOS zoom-on-focus */
+            .time-toggle { padding: 10px 12px; min-height: 44px; }
             .tier-row {
                 flex-wrap: nowrap;
                 overflow-x: auto;
                 -webkit-overflow-scrolling: touch;
                 scrollbar-width: none;
-                margin: 12px -16px 0;
-                padding: 0 16px 2px;
+                margin: 8px -16px 0;
+                padding: 4px 16px 6px;               /* room for focus rings */
+                /* fade the right edge so it's visible that more pills scroll in */
+                -webkit-mask-image: linear-gradient(to right, #000 85%, transparent);
+                mask-image: linear-gradient(to right, #000 85%, transparent);
+                scroll-padding-inline: 16px;
             }
             .tier-row::-webkit-scrollbar { display: none; }
-            .tier-pill { padding: 9px 14px; flex-shrink: 0; }
+            .tier-row.at-end { -webkit-mask-image: none; mask-image: none; }
+            .tier-pill { padding: 9px 14px; min-height: 40px; flex-shrink: 0; }
             .ai-summary { margin: 16px; padding: 20px 16px; }
             .ai-summary .lead { font-size: 15px; }
             .briefing-item { gap: 10px; }
@@ -464,13 +533,10 @@ TEMPLATE = """<!DOCTYPE html>
             .briefing-sources { gap: 4px 14px; font-size: 13px; margin-left: 34px; }
             .briefing-sources a { padding: 4px 0; }
             .main { padding-top: 8px; padding-bottom: 16px; }
-            .pub-grid { grid-template-columns: 1fr; gap: 16px; }
+            .pub-grid { grid-template-columns: minmax(0, 1fr); gap: 16px; }
             .article { padding: 12px 14px; }
             .article .meta { flex-wrap: wrap; gap: 4px 10px; }
             .empty-state { padding: 40px 16px; }
-        }
-        @media (hover: none) {
-            .article:hover { background: none; }
         }
     </style>
 </head>
@@ -617,14 +683,23 @@ TEMPLATE = """<!DOCTYPE html>
         const allActive = activeTiers.size === ALL_TIERS.length;
         document.querySelectorAll('.tier-pill').forEach(pill => {
             const t = pill.dataset.tier;
-            if (t === 'all') {
-                pill.classList.toggle('active', allActive);
-            } else {
-                pill.classList.toggle('active', activeTiers.has(t));
-            }
+            const on = t === 'all' ? allActive : activeTiers.has(t);
+            pill.classList.toggle('active', on);
+            pill.setAttribute('aria-pressed', on ? 'true' : 'false');
         });
         applyFilters();
     }
+
+    // Drop the right-edge fade once the pill row is scrolled to its end
+    (function () {
+        const row = document.getElementById('tierRow');
+        if (!row) return;
+        const update = () => row.classList.toggle('at-end',
+            row.scrollLeft + row.clientWidth >= row.scrollWidth - 4);
+        row.addEventListener('scroll', update, { passive: true });
+        window.addEventListener('resize', update);
+        update();
+    })();
 
     document.querySelectorAll('.tier-pill').forEach(pill => {
         pill.addEventListener('click', () => toggleTier(pill.dataset.tier));
@@ -791,7 +866,7 @@ def build_publication_card(pub_name, articles):
             )
         summary_text = esc(a.get('summary', '')[:200])
         title = esc(a.get('title', ''))
-        link = esc(a.get('link', ''))
+        link = esc(safe_url(a.get('link', '')))
         author = esc(a.get('author', ''))
         published = esc(a.get('published', ''))
 
@@ -829,7 +904,7 @@ def build_tier_pills(pubs):
 
     total = sum(tier_counts.values())
     pills_html = (
-        f'<button class="tier-pill active" data-tier="all">'
+        f'<button type="button" class="tier-pill active" aria-pressed="true" data-tier="all">'
         f'All <span class="tier-count">{total}</span>'
         f'</button>'
     )
@@ -839,7 +914,7 @@ def build_tier_pills(pubs):
             continue
         label = TIER_LABELS.get(tier, tier)
         pills_html += (
-            f'<button class="tier-pill active" data-tier="{esc(tier)}">'
+            f'<button type="button" class="tier-pill active" aria-pressed="true" data-tier="{esc(tier)}">'
             f'<span class="tier-dot"></span>{esc(label)}'
             f'<span class="tier-count">{count}</span>'
             f'</button>'
