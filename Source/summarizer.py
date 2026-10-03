@@ -42,7 +42,7 @@ OUTPUT. Return one JSON object and nothing else (no markdown, no code fences, no
   ]
 }
 
-Items: up to 6, ranked most important first. There is no minimum — a quiet day can have 1-3 items. Every item must list the IDs of the articles that support it; drop any item you cannot support from the list. Cluster duplicate coverage of one story into a single item; never run the same story twice. If nothing relevant and supported remains, return {"lead": "", "items": []}.
+Items: normally 4-6, ranked most important first. Secondary but relevant news (frontier AI, enterprise tech, global macro, European politics) belongs lower in the ranking rather than being left out. Go below 4 only when the list genuinely lacks enough relevant stories. Every item must list the IDs of the articles that support it and say only what those articles support — when evidence is thin, write a shorter, attributed item rather than dropping the story. Cluster duplicate coverage of one story into a single item; never run the same story twice. Return {"lead": "", "items": []} only if the list contains no relevant story at all.
 
 Ranking guide (a guide, not fixed tiers — a major CEE fiscal or regulatory change can outrank an incremental AI launch):
 - Direct sector drivers: ECB or BNR moves, EUR/RON FX, EU automotive and mobility regulation, EV residual values, fuel and energy prices, used-car and remarketing markets.
@@ -187,6 +187,7 @@ def render_briefing(data, articles_by_id, today):
                      "ids": ids, "evidence": evidence})
 
     if not kept:
+        print(f"  Briefing check: 0 of {len(data.get('items', []))} item(s) survived validation")
         return None
 
     lead = str(data.get("lead", "")).strip()
@@ -318,7 +319,11 @@ def generate_briefing():
             print("  AI briefing generated successfully")
         if getattr(response, "stop_reason", None) == "max_tokens":
             raise ValueError(f"briefing truncated at MAX_BRIEFING_TOKENS={MAX_BRIEFING_TOKENS}")
-        return render_briefing(_parse_briefing_json(summary), articles_by_id, today)
+        data = _parse_briefing_json(summary)
+        if not data.get("items"):
+            # Public log, public news only: show why the model returned nothing.
+            print(f"  Briefing: model returned no items. Raw reply: {summary[:500]!r}")
+        return render_briefing(data, articles_by_id, today)
     except anthropic.AuthenticationError as e:
         print(f"  ERROR: Invalid ANTHROPIC_API_KEY — {e}")
         return None
