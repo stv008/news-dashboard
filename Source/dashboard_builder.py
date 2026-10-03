@@ -174,6 +174,30 @@ TEMPLATE = """<!DOCTYPE html>
         .refresh-btn .icon { font-size: 15px; transition: transform 0.6s; }
         .refresh-btn.loading .icon { animation: spin 1s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
+        .header-actions {
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            gap: 8px;
+        }
+        .translate-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 6px 14px;
+            background: var(--surface2);
+            color: var(--text);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
+        .translate-btn:hover { border-color: var(--accent); }
+        .translate-btn[aria-pressed="true"] { border-color: var(--accent); background: rgba(108, 122, 255, 0.12); }
+        .translate-btn[hidden] { display: none; }
 
         /* Search */
         .search-bar {
@@ -507,6 +531,7 @@ TEMPLATE = """<!DOCTYPE html>
             .header .right-section { justify-content: space-between; gap: 12px; }
             .header .stats { gap: 14px; }
             .refresh-btn { min-height: 44px; }
+            .translate-btn { min-height: 40px; }
             .search-bar { padding-top: 12px; padding-bottom: 12px; }
             .search-row { gap: 8px; }
             .search-bar input { font-size: 16px; padding: 10px 14px; min-width: 0; flex: 1 1 auto; }  /* 16px stops iOS zoom-on-focus */
@@ -551,9 +576,14 @@ TEMPLATE = """<!DOCTYPE html>
                 <div><span>{{ total_articles }}</span> articles</div>
                 <div><span>{{ pub_count }}</span> publications</div>
             </div>
-            <button class="refresh-btn" id="refreshBtn" onclick="refreshDashboard()">
-                <span class="icon">&#x21bb;</span> Refresh
-            </button>
+            <div class="header-actions">
+                <button class="refresh-btn" id="refreshBtn" onclick="refreshDashboard()">
+                    <span class="icon">&#x21bb;</span> Refresh
+                </button>
+                <button type="button" class="translate-btn" id="translateBtn" aria-pressed="false" hidden>
+                    <span aria-hidden="true">🌐</span> <span class="translate-label">Translate</span>
+                </button>
+            </div>
         </div>
     </div>
 
@@ -619,8 +649,9 @@ TEMPLATE = """<!DOCTYPE html>
             }
 
             if (show && query) {
-                const title = (el.dataset.title || '').toLowerCase();
-                const summary = (el.dataset.summary || '').toLowerCase();
+                // Match either language, whichever is currently shown
+                const title = [el.dataset.title, el.dataset.titleEn, el.dataset.titleOrig].join(' ').toLowerCase();
+                const summary = [el.dataset.summary, el.dataset.summaryEn, el.dataset.summaryOrig].join(' ').toLowerCase();
                 const pub = (el.dataset.pub || '').toLowerCase();
                 if (!title.includes(query) && !summary.includes(query) && !pub.includes(query)) {
                     show = false;
@@ -689,6 +720,48 @@ TEMPLATE = """<!DOCTYPE html>
         });
         applyFilters();
     }
+
+    // Translate toggle: originals by default; English versions are already in
+    // the page (translated at build time), so switching is instant.
+    (function () {
+        const btn = document.getElementById('translateBtn');
+        const items = document.querySelectorAll('.article.has-translation');
+        if (!btn || !items.length) return;
+        btn.hidden = false;
+        const KEY = 'news-dashboard-translate';
+        function apply(english) {
+            items.forEach(el => {
+                const d = el.dataset;
+                const title = english ? d.titleEn : d.titleOrig;
+                const summary = english ? d.summaryEn : d.summaryOrig;
+                const link = el.querySelector('a');
+                if (link) link.textContent = title;
+                const prev = el.querySelector('.summary-preview');
+                if (prev) prev.textContent = summary;
+                el.dataset.title = title;
+                el.dataset.summary = summary;
+                const tag = el.querySelector('.translated-tag');
+                if (tag) {
+                    tag.textContent = english
+                        ? (d.lang ? '🌐 from ' + d.lang : '🌐 translated')
+                        : '🌐 ' + (d.lang || 'original');
+                    tag.title = english ? d.titleOrig : d.titleEn;
+                }
+            });
+            btn.setAttribute('aria-pressed', english ? 'true' : 'false');
+            btn.querySelector('.translate-label').textContent = english ? 'Original' : 'Translate';
+            btn.title = english ? 'Show titles in their original language' : 'Translate foreign-language titles to English';
+        }
+        let english = false;
+        try { english = localStorage.getItem(KEY) === 'en'; } catch (e) {}
+        apply(english);
+        btn.addEventListener('click', () => {
+            english = !english;
+            apply(english);
+            try { localStorage.setItem(KEY, english ? 'en' : 'orig'); } catch (e) {}
+            applyFilters();
+        });
+    })();
 
     // Drop the right-edge fade once the pill row is scrolled to its end
     (function () {
@@ -855,23 +928,35 @@ def build_publication_card(pub_name, articles):
         time_str = format_time(a['published'])
         section = esc(a.get('section', ''))
         section_tag = f'<span class="section-tag">{section}</span>' if section else ''
-        # Show a hint when the title/summary were machine-translated to English.
+        # Machine-translated articles carry both versions; the page shows the
+        # original by default and the Translate toggle swaps in English (JS).
         translated_tag = ''
+        lang_attrs = ''
+        article_class = 'article'
+        title_raw = a.get('title', '') or ''
+        summary_raw = (a.get('summary', '') or '')[:200]
         if a.get('title_original'):
+            title_en, summary_en = title_raw, summary_raw
+            title_raw = a['title_original']
+            summary_raw = (a.get('summary_original') or '')[:200]
             lang = esc(PUB_LANGUAGES.get(pub_name, ''))
-            label = f'translated from {lang}' if lang else 'translated'
-            translated_tag = (
-                f'<span class="translated-tag" '
-                f'title="{esc(a.get("title_original", ""))}">🌐 {label}</span>'
+            article_class = 'article has-translation'
+            lang_attrs = (
+                f' data-title-orig="{esc(title_raw)}" data-title-en="{esc(title_en)}"'
+                f' data-summary-orig="{esc(summary_raw)}" data-summary-en="{esc(summary_en)}"'
+                f' data-lang="{lang}"'
             )
-        summary_text = esc(a.get('summary', '')[:200])
-        title = esc(a.get('title', ''))
+            translated_tag = (
+                f'<span class="translated-tag" title="{esc(title_en)}">🌐 {lang or "original"}</span>'
+            )
+        summary_text = esc(summary_raw)
+        title = esc(title_raw)
         link = esc(safe_url(a.get('link', '')))
         author = esc(a.get('author', ''))
         published = esc(a.get('published', ''))
 
         articles_html += f"""
-        <div class="article" data-title="{title}" data-summary="{summary_text}" data-pub="{esc(pub_name)}" data-published="{published}">
+        <div class="{article_class}" data-title="{title}" data-summary="{summary_text}" data-pub="{esc(pub_name)}" data-published="{published}"{lang_attrs}>
             <a href="{link}" target="_blank" rel="noopener">{title}</a>
             <div class="meta">
                 {section_tag}
