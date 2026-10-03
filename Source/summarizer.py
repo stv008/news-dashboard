@@ -37,7 +37,7 @@ OUTPUT. Return one JSON object and nothing else (no markdown, no code fences, no
       "label": "1-3 word tag, e.g. RATES, FX, EV/FLEET, AI GOV, FRONTIER AI, ROMANIA, M&A",
       "headline": "One line naming the specific development (party, decision, figure) — not a topic.",
       "detail": "2-3 sentences: what was reported, attributed to its publication, then the sector implication if one is supported.",
-      "sources": ["A12", "A40"]
+      "sources": ["A12", "A40"]  (article IDs go ONLY here \u2014 never write IDs in the lead, headline or detail)
     }
   ]
 }
@@ -105,7 +105,15 @@ BRIEFING_LOOKBACK_HOURS = 36  # Articles older than this are stale for a daily b
 
 SUMMARY_CHARS = 250  # RSS summary length shown to the model (and used for checks)
 
-_NUM_RE = re.compile(r"\d+(?:[.,]\d+)*")
+# Digits glued to a preceding letter are identifiers, not figures: article IDs
+# (A62), model names (H100, GPT4), quarters (Q3). Hyphenated "GPT-6" still counts.
+_NUM_RE = re.compile(r"(?<![A-Za-z0-9_])\d+(?:[.,]\d+)*")
+# Bracketed article-ID citations the model sometimes writes inline: "(A62, A79)"
+_ID_REF_RE = re.compile(r"\s*[\(\[]\s*A\d+(?:\s*[,;/]\s*A\d+)*\s*[\)\]]")
+
+
+def _clean(text):
+    return _ID_REF_RE.sub("", str(text or "")).strip()
 
 
 def _numbers(text):
@@ -168,8 +176,8 @@ def render_briefing(data, articles_by_id, today):
     for item in data.get("items", [])[:6]:
         if not isinstance(item, dict):
             continue
-        headline = str(item.get("headline", "")).strip()
-        detail = str(item.get("detail", "")).strip()
+        headline = _clean(item.get("headline"))
+        detail = _clean(item.get("detail"))
         label = str(item.get("label", "")).strip()[:24]
         ids = [i for i in dict.fromkeys(item.get("sources") or []) if i in articles_by_id]
         if not headline or not ids:
@@ -190,7 +198,7 @@ def render_briefing(data, articles_by_id, today):
         print(f"  Briefing check: 0 of {len(data.get('items', []))} item(s) survived validation")
         return None
 
-    lead = str(data.get("lead", "")).strip()
+    lead = _clean(data.get("lead"))
     all_evidence = " ".join(k["evidence"] for k in kept)
     if not lead or _unsupported_numbers(lead, all_evidence, today):
         if lead:
