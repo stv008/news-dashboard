@@ -1007,9 +1007,28 @@ def build_tier_pills(pubs):
     return pills_html
 
 
+def dedupe_articles(articles):
+    """Drop repeat copies of the same story within a publication.
+
+    Publishers list one article in several section feeds with different
+    tracking parameters or section paths (WSJ ?mod=..., profit.ro /stiri/...),
+    which gives each copy its own ID. Same publication + same title = same
+    story; keep the first (newest, since input is newest-first).
+    """
+    seen = set()
+    unique = []
+    for a in articles:
+        key = (a.get('publication'), " ".join((a.get('title') or '').split()).casefold())
+        if key in seen:
+            continue
+        seen.add(key)
+        unique.append(a)
+    return unique
+
+
 def build_dashboard(ai_summary=None):
     """Generate the full HTML dashboard."""
-    articles = get_articles()
+    articles = dedupe_articles(get_articles())
 
     # Group by publication
     pubs = {}

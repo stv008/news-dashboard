@@ -263,6 +263,15 @@ def get_top_articles():
         """, (cutoff,))
         rows = [dict(r) for r in cursor.fetchall()]
 
+    # Same story listed in several section feeds (different URLs): keep one copy
+    seen, unique = set(), []
+    for r in rows:
+        key = (r["publication"], " ".join((r["title"] or "").split()).casefold())
+        if key not in seen:
+            seen.add(key)
+            unique.append(r)
+    rows = unique
+
     by_pub = {}
     for r in rows:
         by_pub.setdefault(r["publication"], []).append(r)
